@@ -10,7 +10,7 @@
 
   <style>
     :root{
-      --accent:#db3553; /* Flamingo-Rosa (dein Wunschton) */
+      --accent:#db3553; /* Flamingo-Rosa */
       --accent-weak:#fbe3e7;
       --bg:#ffffff;
       --text:#2b2b2b;
@@ -27,9 +27,10 @@
 
     /* Header */
     header{
-      position:sticky;top:0;z-index:10;background:var(--bg);
-      border-bottom:1px solid var(--border);
-      backdrop-filter:saturate(1.2) blur(4px);
+      position:sticky;top:0;z-index:10;
+      background:var(--accent);
+      color:#fff;
+      box-shadow:0 2px 6px rgba(0,0,0,.1);
     }
     .wrap{max-width:1200px;margin:0 auto;padding:18px 18px}
     .title{
@@ -37,25 +38,37 @@
       font-weight:800;font-size:24px;letter-spacing:.2px;
     }
     .flamingo-dot{
-      width:12px;height:12px;border-radius:50%;background:var(--accent);
-      box-shadow:0 0 0 6px var(--accent-weak);
+      width:12px;height:12px;border-radius:50%;background:#fff;
+      box-shadow:0 0 0 6px rgba(255,255,255,0.25);
     }
 
     /* Controls */
     .controls{
       display:grid;grid-template-columns:repeat(12,1fr);gap:10px;margin-top:12px;
     }
-    .controls select,.controls input[type="search"], .fav-toggle{
+    .controls select,
+    .controls input[type="search"],
+    .fav-toggle{
       grid-column: span 4;
-      padding:11px 12px;border:1px solid var(--border);border-radius:12px;background:#fff;
-      font-size:14px;outline:none;
+      padding:11px 12px;
+      border:none;
+      border-radius:12px;
+      background:#fff;
+      font-size:14px;
+      outline:none;
+      color:#333;
     }
     .controls input[type="search"]{grid-column: span 5;}
     .fav-toggle{
-      grid-column: span 3; display:flex;align-items:center;justify-content:center;gap:8px;
-      cursor:pointer;user-select:none;background:var(--accent-weak);border-color:transparent;color:var(--accent);font-weight:600;
+      grid-column: span 3;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      cursor:pointer;user-select:none;
+      background:#fff0f3;
+      color:var(--accent);
+      font-weight:600;
+      transition:background .2s ease;
     }
-    .fav-toggle.active{background:var(--accent);color:#fff}
+    .fav-toggle.active{background:#fff;color:var(--accent);border:2px solid #fff;}
 
     /* Main layout */
     main{max-width:1200px;margin:0 auto;padding:18px}
@@ -76,7 +89,8 @@
     .sub{color:var(--muted);font-size:12px;display:flex;gap:6px;flex-wrap:wrap}
     .badge{
       display:inline-flex;align-items:center;gap:6px;
-      font-size:11px;color:var(--accent);background:var(--accent-weak);padding:4px 8px;border-radius:999px;font-weight:700
+      font-size:11px;color:var(--accent);background:var(--accent-weak);
+      padding:4px 8px;border-radius:999px;font-weight:700
     }
 
     /* Detail view */
@@ -93,16 +107,18 @@
     .detail-sub{color:var(--muted);margin:8px 0 14px}
     .chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
     .chip{
-      font-size:12px;border-radius:999px;border:1px solid var(--border);padding:5px 10px;background:#fff;cursor:pointer
+      font-size:12px;border-radius:999px;border:1px solid var(--border);
+      padding:5px 10px;background:#fff;cursor:pointer
     }
     .chip:hover{border-color:var(--accent);color:var(--accent)}
     .detail-img{
-      width:100%;border-radius:12px;border:1px solid var(--border);background:#f6f6f6;object-fit:cover;max-height:520px
+      width:100%;border-radius:12px;border:1px solid var(--border);
+      background:#f6f6f6;object-fit:cover;max-height:520px
     }
     .detail-section{margin:18px 0}
     .quote{
-      border-left:4px solid var(--accent);padding:10px 12px;background:#fff; border-radius:8px;
-      font-style:italic;color:#111
+      border-left:4px solid var(--accent);padding:10px 12px;background:#fff;
+      border-radius:8px;font-style:italic;color:#111
     }
     .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
     .btn{
@@ -173,8 +189,9 @@
   </main>
 
   <script>
-    // ---- Konfiguration
+    // --- CSV-Link deines Sheets ---
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
+
     const COL = {
       style: 'Art style',
       photo: 'Photo',
@@ -189,10 +206,8 @@
       imgSearch: 'Images search'
     };
 
-    // ---- State
-    let rows = [];             // alle Datensätze
-    let filtered = [];         // nach Filter+Suche gefiltert
-    let byName = new Map();    // Name -> Row (für Detailansicht)
+    let rows = [];
+    let byName = new Map();
     let favOnly = false;
 
     const els = {
@@ -219,138 +234,91 @@
       dPhoto: document.getElementById('dPhoto'),
     };
 
-    // ---- Hilfen
-    function isFav(val){
-      if(!val) return false;
-      const v = String(val).trim().toLowerCase();
-      return v && v !== '0' && v !== 'false' && v !== 'nein' && v !== 'no';
-    }
-    function uniqSorted(list){
-      return Array.from(new Set(list.filter(Boolean).map(s=>String(s).trim()))).sort((a,b)=>a.localeCompare(b));
-    }
-    function field(row, key){ return row?.[key] ?? ''; }
+    function isFav(v){return v && String(v).trim().length>0;}
+    function uniqSorted(list){return Array.from(new Set(list.filter(Boolean).map(s=>String(s).trim()))).sort();}
+    function field(row,key){return row?.[key]??'';}
 
-    // ---- Daten laden
-    Papa.parse(SHEET_CSV_URL, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      complete: (res)=>{
-        rows = res.data.map(r => ({
-          style: field(r, COL.style),
-          photo: field(r, COL.photo),
-          name: field(r, COL.name),
-          dates: field(r, COL.dates),
-          nation: field(r, COL.nation),
-          works: field(r, COL.works),
-          bio: field(r, COL.bio),
-          quote: field(r, COL.quote),
-          fav: field(r, COL.fav),
-          wiki: field(r, COL.wiki),
-          imgSearch: field(r, COL.imgSearch)
+    Papa.parse(SHEET_CSV_URL,{
+      download:true,header:true,skipEmptyLines:true,
+      complete:(res)=>{
+        rows=res.data.map(r=>({
+          style:field(r,COL.style),
+          photo:field(r,COL.photo),
+          name:field(r,COL.name),
+          dates:field(r,COL.dates),
+          nation:field(r,COL.nation),
+          works:field(r,COL.works),
+          bio:field(r,COL.bio),
+          quote:field(r,COL.quote),
+          fav:field(r,COL.fav),
+          wiki:field(r,COL.wiki),
+          imgSearch:field(r,COL.imgSearch)
         })).filter(r=>r.name);
-
-        rows.forEach(r => byName.set(r.name, r));
-        initFilters();
-        applyFromURL(); // ?artist=...
-        render();
-      },
-      error: (err)=>{ console.error('CSV-Fehler', err); alert('Fehler beim Laden der Daten.'); }
+        rows.forEach(r=>byName.set(r.name,r));
+        initFilters();render();
+      }
     });
 
-    // ---- Filter initialisieren
     function initFilters(){
-      const styles = uniqSorted(rows.map(r=>r.style));
-      const nations = uniqSorted(rows.map(r=>r.nation));
-
-      styles.forEach(s=>{
-        const opt = document.createElement('option');
-        opt.value = s; opt.textContent = s;
-        els.styleFilter.appendChild(opt);
-      });
-      nations.forEach(n=>{
-        const opt = document.createElement('option');
-        opt.value = n; opt.textContent = n;
-        els.nationFilter.appendChild(opt);
-      });
-
-      els.styleFilter.addEventListener('change', ()=>{ syncURL(null); render(); });
-      els.nationFilter.addEventListener('change', ()=>{ syncURL(null); render(); });
-      els.search.addEventListener('input', ()=>{ syncURL(null); render(); });
-      els.favToggle.addEventListener('click', ()=>{
-        favOnly = !favOnly;
-        els.favToggle.classList.toggle('active', favOnly);
-        syncURL(null);
-        render();
-      });
-
-      els.backBtn.addEventListener('click', ()=>{ showList(); syncURL(null); });
+      const styles=uniqSorted(rows.map(r=>r.style));
+      const nations=uniqSorted(rows.map(r=>r.nation));
+      styles.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;els.styleFilter.appendChild(o);});
+      nations.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;els.nationFilter.appendChild(o);});
+      els.styleFilter.onchange=render;
+      els.nationFilter.onchange=render;
+      els.search.oninput=render;
+      els.favToggle.onclick=()=>{favOnly=!favOnly;els.favToggle.classList.toggle('active',favOnly);render();};
+      els.backBtn.onclick=()=>{showList();};
     }
 
-    // ---- Rendering
     function render(){
-      const q = els.search.value.trim().toLowerCase();
-      const fStyle = els.styleFilter.value;
-      const fNation = els.nationFilter.value;
-
-      filtered = rows.filter(r=>{
-        if (fStyle && r.style !== fStyle) return false;
-        if (fNation && r.nation !== fNation) return false;
-        if (favOnly && !isFav(r.fav)) return false;
-        if (!q) return true;
-        const hay = [r.name,r.style,r.nation,r.works,r.bio,r.quote].join(' | ').toLowerCase();
-        return hay.includes(q);
+      const q=els.search.value.trim().toLowerCase();
+      const fStyle=els.styleFilter.value;
+      const fNation=els.nationFilter.value;
+      const filtered=rows.filter(r=>{
+        if(fStyle&&r.style!==fStyle)return false;
+        if(fNation&&r.nation!==fNation)return false;
+        if(favOnly&&!isFav(r.fav))return false;
+        if(!q)return true;
+        return [r.name,r.style,r.nation,r.works,r.bio,r.quote].join('|').toLowerCase().includes(q);
       });
-
-      if (document.body.dataset.view === 'detail') return; // Detail aktiv: Liste nicht neu zeichnen
-
-      els.gallery.innerHTML = '';
+      els.gallery.innerHTML='';
       filtered.forEach(r=>{
-        const card = document.createElement('article');
-        card.className = 'card';
-        card.setAttribute('role','button');
-        card.title = r.name;
-
-        const img = document.createElement('img');
-        img.className = 'thumb';
-        img.alt = r.name;
-        img.loading = 'lazy';
-        img.src = r.photo || '';
-        img.onerror = ()=>{ img.src = 'data:image/svg+xml;charset=utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#f4f4f4"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#999" font-family="Arial" font-size="20">No Image</text></svg>`); };
-
-        const meta = document.createElement('div'); meta.className='meta';
-        const name = document.createElement('div'); name.className='name'; name.textContent = r.name;
-        const sub = document.createElement('div'); sub.className='sub';
-        sub.innerHTML = `
-          <span>${r.style || '—'}</span> • <span>${r.nation || '—'}</span>
-          ${isFav(r.fav) ? `&nbsp;<span class="badge">💖 Lieblingsartist</span>` : ``}
-        `;
-
-        meta.appendChild(name); meta.appendChild(sub);
-        card.appendChild(img); card.appendChild(meta);
-        card.addEventListener('click', ()=>{
-          showDetail(r.name);
-          syncURL(r.name);
-        });
-
-        els.gallery.appendChild(card);
+        const card=document.createElement('article');
+        card.className='card';
+        const img=document.createElement('img');
+        img.className='thumb';
+        img.src=r.photo||'';
+        img.alt=r.name;
+        const meta=document.createElement('div');meta.className='meta';
+        meta.innerHTML=`<div class="name">${r.name}</div><div class="sub">${r.style||'–'} • ${r.nation||'–'} ${isFav(r.fav)?'<span class="badge">💖</span>':''}</div>`;
+        card.append(img,meta);
+        card.onclick=()=>showDetail(r.name);
+        els.gallery.append(card);
       });
-
-      els.empty.classList.toggle('hidden', filtered.length>0);
+      els.empty.classList.toggle('hidden',filtered.length>0);
     }
 
-    // ---- Detail
     function showDetail(name){
-      const r = byName.get(name);
-      if(!r){ console.warn('Artist nicht gefunden', name); return; }
+      const r=byName.get(name);if(!r)return;
+      els.gallery.classList.add('hidden');els.detail.style.display='block';
+      els.dName.textContent=r.name;
+      els.dDates.textContent=r.dates||'';
+      els.dStyle.textContent=r.style||'';
+      els.dNation.textContent=r.nation||'';
+      els.dFav.classList.toggle('hidden',!isFav(r.fav));
+      els.dBio.innerHTML=r.bio?`<h3>Kurzbiografie</h3><p>${r.bio}</p>`:'';
+      els.dWorks.innerHTML=r.works?`<h3>Famous Works</h3><p>${r.works}</p>`:'';
+      if(r.quote){els.dQuote.classList.remove('hidden');els.dQuoteText.textContent=r.quote;}else{els.dQuote.classList.add('hidden');}
+      els.dWiki.href=r.wiki||'#';els.dImgSearch.href=r.imgSearch||'#';
+      els.dPhoto.src=r.photo||'';els.dPhoto.alt=r.name;
+      els.dStyle.onclick=()=>{els.styleFilter.value=r.style||'';showList();render();};
+      els.dNation.onclick=()=>{els.nationFilter.value=r.nation||'';showList();render();};
+    }
 
-      document.body.dataset.view = 'detail';
-      els.gallery.classList.add('hidden');
-      els.empty.classList.add('hidden');
-      els.detail.style.display = 'block';
-
-      els.dName.textContent = r.name;
-      els.dDates.textContent = r.dates || '';
-      els.dStyle.textContent = r.style || '—';
-      els.dNation.textContent = r.nation || '—';
-      els.dFav.classList.toggle('hidden', !isFav(r.fav));
+    function showList(){
+      els.detail.style.display='none';els.gallery.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
