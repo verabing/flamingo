@@ -174,7 +174,16 @@
       els.search.oninput=render
       els.favToggle.onclick=()=>{favOnly=!favOnly;els.favToggle.classList.toggle('active',favOnly);render()}
       els.backBtn.onclick=()=>{showList();history.pushState({},'',location.pathname)}
-      els.homeLink.onclick=()=>{showList();history.pushState({},'',location.pathname)}
+      els.homeLink.onclick=()=>{
+  els.styleFilter.value = '';
+  els.nationFilter.value = '';
+  els.search.value = '';
+  favOnly = false;
+  els.favToggle.classList.remove('active');
+  showList();
+  render();
+  history.pushState({},'',location.pathname);
+}
       window.onpopstate=()=>{if(location.search.startsWith('?artist=')){const n=new URLSearchParams(location.search).get('artist');showDetail(n,false)}else showList()}
     }
 
@@ -215,7 +224,7 @@
 
     async function loadArtistImages(name){
       try{
-        const q=encodeURIComponent(name+" artworks")
+        const q = encodeURIComponent(`${name} (art OR artwork OR painting OR canvas OR print)`)
         const url=`https://www.googleapis.com/customsearch/v1?q=${q}&cx=${GOOGLE_CX}&key=${GOOGLE_API_KEY}&searchType=image&num=6`
         const res=await fetch(url)
         const data=await res.json()
