@@ -226,7 +226,6 @@
       try{
        const q = encodeURIComponent(`${name} artist painting OR artwork OR art OR canvas OR gallery OR museum`)
         const url = `https://www.googleapis.com/customsearch/v1?q=${q}&cx=${GOOGLE_CX}&key=${GOOGLE_API_KEY}&searchType=image&num=10&imgType=photo&imgSize=medium&safe=off`
-        const url=`https://www.googleapis.com/customsearch/v1?q=${q}&cx=${GOOGLE_CX}&key=${GOOGLE_API_KEY}&searchType=image&num=6`
         const res=await fetch(url)
         const data=await res.json()
         const imgs=data.items?.map(i=>`<img src="${i.link}" alt="${i.title}">`).join('')||''
