@@ -172,4 +172,59 @@
       nations.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;els.nationFilter.appendChild(o)})
       els.styleFilter.onchange=render;els.nationFilter.onchange=render
       els.search.oninput=render
-      els.favToggle.onclick=()=>{favOnly=!favOnly;els.favToggle.classList.toggle('activ
+      els.favToggle.onclick=()=>{favOnly=!favOnly;els.favToggle.classList.toggle('active',favOnly);render()}
+      els.backBtn.onclick=()=>{showList();history.pushState({},'',location.pathname)}
+      els.homeLink.onclick=()=>{showList();history.pushState({},'',location.pathname)}
+      window.onpopstate=()=>{if(location.search.startsWith('?artist=')){const n=new URLSearchParams(location.search).get('artist');showDetail(n,false)}else showList()}
+    }
+
+    function render(){
+      const q=els.search.value.trim().toLowerCase(),fStyle=els.styleFilter.value,fNation=els.nationFilter.value
+      const filtered=rows.filter(r=>{
+        if(fStyle&&r.style!==fStyle)return false
+        if(fNation&&r.nation!==fNation)return false
+        if(favOnly&&!isFav(r.fav))return false
+        if(!q)return true
+        return [r.name,r.style,r.nation,r.works,r.bio,r.quote].join('|').toLowerCase().includes(q)
+      })
+      els.gallery.innerHTML=''
+      filtered.forEach(r=>{
+        const card=document.createElement('article');card.className='card'
+        card.innerHTML=`<img class="thumb" src="${r.photo}" alt="${r.name}"><div class="meta"><div class="name">${r.name}</div><div class="sub">${r.style||''} • ${r.nation||''} ${isFav(r.fav)?'💖':''}</div></div>`
+        card.onclick=()=>{showDetail(r.name,true)}
+        els.gallery.append(card)
+      })
+    }
+
+    function showDetail(name,push){
+      const r=byName.get(name);if(!r)return
+      els.gallery.classList.add('hidden');els.detail.style.display='block'
+      els.dName.textContent=r.name;els.dDates.textContent=r.dates
+      els.dStyle.textContent=r.style;els.dNation.textContent=r.nation
+      els.dFav.classList.toggle('hidden',!isFav(r.fav))
+      els.dBio.innerHTML=r.bio?`<h3>Kurzbiografie</h3><p>${r.bio}</p>`:''
+      els.dWorks.innerHTML=r.works?`<h3>Famous Works</h3><p>${r.works}</p>`:''
+      if(r.quote){els.dQuote.classList.remove('hidden');els.dQuoteText.textContent=r.quote}else els.dQuote.classList.add('hidden')
+      els.dWiki.href=r.wiki||'#';els.dPhoto.src=r.photo
+      els.dStyle.onclick=()=>{els.styleFilter.value=r.style||'';showList();render()}
+      els.dNation.onclick=()=>{els.nationFilter.value=r.nation||'';showList();render()}
+      els.imageGallery.innerHTML=''
+      if(push)history.pushState({},'',`?artist=${encodeURIComponent(name)}`)
+      loadArtistImages(r.name)
+    }
+
+    async function loadArtistImages(name){
+      try{
+        const q=encodeURIComponent(name+" artworks")
+        const url=`https://www.googleapis.com/customsearch/v1?q=${q}&cx=${GOOGLE_CX}&key=${GOOGLE_API_KEY}&searchType=image&num=6`
+        const res=await fetch(url)
+        const data=await res.json()
+        const imgs=data.items?.map(i=>`<img src="${i.link}" alt="${i.title}">`).join('')||''
+        els.imageGallery.innerHTML=imgs
+      }catch(e){console.error("Image load error",e)}
+    }
+
+    function showList(){els.detail.style.display='none';els.gallery.classList.remove('hidden')}
+  </script>
+</body>
+</html>
