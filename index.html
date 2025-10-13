@@ -125,6 +125,80 @@
     .image-gallery{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
     .image-gallery img{width:120px;height:120px;object-fit:cover;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
     .hidden{display:none!important}
+    /* ---- MOBILE OPTIMIERUNG ---- */
+@media (max-width: 768px) {
+  header {
+    padding: 8px 0;
+  }
+
+  .wrap {
+    padding: 10px;
+  }
+
+  .title {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  header p {
+    display: none; /* Beschreibung ausblenden auf Handy */
+  }
+
+  .controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .controls select,
+  .controls input,
+  .fav-toggle {
+    height: 34px;
+    width: 48%;
+    font-size: 13px;
+  }
+
+  .fav-toggle {
+    width: 34px;
+    min-width: 34px;
+    padding: 0;
+    font-size: 16px;
+  }
+
+  main {
+    padding: 10px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 Spalten */
+    gap: 10px;
+  }
+
+  .card {
+    border-radius: 10px;
+    box-shadow: none;
+  }
+
+  .thumb {
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    max-height: 180px;
+  }
+
+  .meta {
+    padding: 6px;
+  }
+
+  .name {
+    font-size: 14px;
+  }
+
+  .sub {
+    font-size: 11px;
+  }
+}
+
   </style>
 </head>
 <body>
