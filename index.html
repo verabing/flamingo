@@ -5,163 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Flamingo meets artist</title>
 
-  <!-- CSV-Parser -->
   <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
     :root{
-      --accent:#db3553; /* Flamingo-Rosa */
+      --accent:#db3553;
       --accent-weak:#fbe3e7;
-      --bg:#ffffff;
+      --bg:#fff;
       --text:#2b2b2b;
-      --muted:#6b6b6b;
-      --card:#ffffff;
+      --muted:#666;
       --border:#eee;
       --shadow:0 6px 24px rgba(0,0,0,.06);
       --radius:14px;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif;color:var(--text);background:var(--bg)}
     a{color:var(--accent);text-decoration:none}
     a:hover{text-decoration:underline}
 
     /* Header */
-    header{
-      position:sticky;top:0;z-index:10;
-      background:var(--accent);
-      color:#fff;
-      box-shadow:0 2px 6px rgba(0,0,0,.1);
-    }
-    .wrap{max-width:1200px;margin:0 auto;padding:18px 18px}
-    .title{
-      display:flex;align-items:center;gap:12px;justify-content:center;
-      font-weight:800;font-size:24px;letter-spacing:.2px;
-    }
-    .flamingo-dot{
-      width:12px;height:12px;border-radius:50%;background:#fff;
-      box-shadow:0 0 0 6px rgba(255,255,255,0.25);
-    }
+    header{position:sticky;top:0;z-index:10;background:var(--accent);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+    .wrap{max-width:1200px;margin:0 auto;padding:18px}
+    .title{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:800;font-size:24px;cursor:pointer}
+    .flamingo-dot{width:12px;height:12px;border-radius:50%;background:#fff}
 
-    /* Controls */
-    .controls{
-      display:grid;grid-template-columns:repeat(12,1fr);gap:10px;margin-top:12px;
+    .controls{display:grid;grid-template-columns:repeat(12,1fr);gap:10px;margin-top:12px}
+    .controls select,.controls input,.fav-toggle{
+      grid-column:span 4;padding:11px 12px;border:none;border-radius:12px;font-size:14px
     }
-    .controls select,
-    .controls input[type="search"],
-    .fav-toggle{
-      grid-column: span 4;
-      padding:11px 12px;
-      border:none;
-      border-radius:12px;
-      background:#fff;
-      font-size:14px;
-      outline:none;
-      color:#333;
-    }
-    .controls input[type="search"]{grid-column: span 5;}
-    .fav-toggle{
-      grid-column: span 3;
-      display:flex;align-items:center;justify-content:center;gap:8px;
-      cursor:pointer;user-select:none;
-      background:#fff0f3;
-      color:var(--accent);
-      font-weight:600;
-      transition:background .2s ease;
-    }
-    .fav-toggle.active{background:#fff;color:var(--accent);border:2px solid #fff;}
+    .controls input{grid-column:span 5}
+    .fav-toggle{grid-column:span 3;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
+      background:#fff0f3;color:var(--accent);font-weight:600}
+    .fav-toggle.active{border:2px solid #fff}
 
-    /* Main layout */
     main{max-width:1200px;margin:0 auto;padding:18px}
-    .grid{
-      display:grid;gap:16px;
-      grid-template-columns: repeat( auto-fill, minmax(180px,1fr) );
-    }
-    .card{
-      background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-      box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform .08s ease;
-    }
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+    .card{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);cursor:pointer}
     .card:hover{transform:translateY(-2px)}
-    .thumb{
-      width:100%;aspect-ratio:1/1;object-fit:cover;background:#f6f6f6;
-    }
+    .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;background:#f6f6f6}
     .meta{padding:10px 12px}
-    .name{font-weight:700;font-size:15px;margin:2px 0 6px}
-    .sub{color:var(--muted);font-size:12px;display:flex;gap:6px;flex-wrap:wrap}
-    .badge{
-      display:inline-flex;align-items:center;gap:6px;
-      font-size:11px;color:var(--accent);background:var(--accent-weak);
-      padding:4px 8px;border-radius:999px;font-weight:700
-    }
+    .name{font-weight:700;margin:2px 0 6px}
+    .sub{color:var(--muted);font-size:12px}
+    .badge{font-size:11px;color:var(--accent)}
 
-    /* Detail view */
     .detail{max-width:900px;margin:0 auto;display:none}
-    .back{
-      display:inline-flex;align-items:center;gap:8px;margin:6px 0 16px;
-      padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;cursor:pointer;
-    }
-    .detail-head{
-      display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:start;
-    }
-    @media (max-width:880px){ .detail-head{grid-template-columns:1fr} }
+    .back{margin:6px 0 16px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer}
+    .detail-head{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+    @media(max-width:880px){.detail-head{grid-template-columns:1fr}}
     .detail-title{margin:0;font-size:28px;font-weight:900}
     .detail-sub{color:var(--muted);margin:8px 0 14px}
     .chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-    .chip{
-      font-size:12px;border-radius:999px;border:1px solid var(--border);
-      padding:5px 10px;background:#fff;cursor:pointer
-    }
+    .chip{font-size:12px;border:1px solid var(--border);padding:5px 10px;border-radius:999px;background:#fff;cursor:pointer}
     .chip:hover{border-color:var(--accent);color:var(--accent)}
-    .detail-img{
-      width:100%;border-radius:12px;border:1px solid var(--border);
-      background:#f6f6f6;object-fit:cover;max-height:520px
-    }
+    .detail-img{width:100%;border-radius:12px;border:1px solid var(--border);background:#f6f6f6;object-fit:cover;max-height:520px}
     .detail-section{margin:18px 0}
-    .quote{
-      border-left:4px solid var(--accent);padding:10px 12px;background:#fff;
-      border-radius:8px;font-style:italic;color:#111
-    }
+    .quote{border-left:4px solid var(--accent);padding:10px 12px;background:#fff;border-radius:8px;font-style:italic}
     .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
-    .btn{
-      display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;
-      border:1px solid var(--accent);color:var(--accent);background:#fff;font-weight:600
-    }
-    .btn:hover{background:var(--accent-weak)}
-    .hidden{display:none !important}
-    .empty{padding:24px;color:var(--muted);text-align:center}
+    .btn{padding:9px 12px;border-radius:10px;border:1px solid var(--accent);color:var(--accent);background:#fff;font-weight:600}
+    .image-gallery{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .image-gallery img{width:120px;height:120px;object-fit:cover;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+    .hidden{display:none!important}
   </style>
 </head>
 <body>
 
-  <!-- Header -->
   <header>
     <div class="wrap">
-      <div class="title">
-        <span class="flamingo-dot" aria-hidden="true"></span>
-        <span>Flamingo meets artist</span>
+      <div class="title" id="homeLink">
+        <span class="flamingo-dot"></span>Flamingo meets artist
       </div>
       <div class="controls">
-        <select id="styleFilter">
-          <option value="">Art Style (alle)</option>
-        </select>
-        <select id="nationFilter">
-          <option value="">Nationality (alle)</option>
-        </select>
+        <select id="styleFilter"><option value="">Art Style (alle)</option></select>
+        <select id="nationFilter"><option value="">Nationality (alle)</option></select>
         <input id="searchInput" type="search" placeholder="Suche: Name, Stil, Nationalität, Werke, Zitat …" />
-        <button id="favToggle" class="fav-toggle" type="button" title="Nur Lieblinge anzeigen">
-          <span>💖</span><span>Lieblinge</span>
-        </button>
+        <button id="favToggle" class="fav-toggle" type="button"><span>💖</span>Lieblinge</button>
       </div>
     </div>
   </header>
 
-  <!-- Galerie -->
   <main>
-    <section id="gallery" class="grid" aria-live="polite"></section>
-    <div id="emptyState" class="empty hidden">Keine Treffer mit den aktuellen Filtern.</div>
+    <section id="gallery" class="grid"></section>
 
-    <!-- Detail -->
     <section id="detail" class="detail">
-      <button class="back" id="backBtn" type="button">← Zurück zur Übersicht</button>
+      <button class="back" id="backBtn">← Zurück</button>
       <div class="detail-head">
         <div>
           <h1 id="dName" class="detail-title"></h1>
@@ -173,152 +99,77 @@
           </div>
           <div id="dBio" class="detail-section"></div>
           <div id="dWorks" class="detail-section"></div>
-          <div id="dQuote" class="detail-section hidden">
-            <div class="quote" id="dQuoteText"></div>
-          </div>
+          <div id="dQuote" class="detail-section hidden"><div class="quote" id="dQuoteText"></div></div>
           <div class="links">
-            <a id="dWiki" class="btn" href="#" target="_blank" rel="noopener">Wikipedia</a>
-            <a id="dImgSearch" class="btn" href="#" target="_blank" rel="noopener">Bilder suchen</a>
+            <a id="dWiki" class="btn" target="_blank" rel="noopener">Wikipedia</a>
           </div>
+          <div id="imageGallery" class="image-gallery"></div>
         </div>
-        <div>
-          <img id="dPhoto" class="detail-img" alt="Artist photo" />
-        </div>
+        <div><img id="dPhoto" class="detail-img" alt="Artist photo" /></div>
       </div>
     </section>
   </main>
 
   <script>
-    // --- CSV-Link deines Sheets ---
+    // --- Dein Google Sheet ---
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
 
+    // --- Hier deine Google API-Daten eintragen ---
+    const GOOGLE_API_KEY = "AIzaSyDJMe8T8ZJeHvF0NcRd8YACQE8FU71wHOY"; // <-- dein API-Key hier
+    const GOOGLE_CX = "4670d1e4605354551";      // <-- deine Search Engine ID (CX) hier
+
     const COL = {
-      style: 'Art style',
-      photo: 'Photo',
-      name: 'artist',
-      dates: 'born - death',
-      nation: 'Nationality',
-      works: 'Famous Work',
-      bio: 'Short biography',
-      quote: 'Known "Quote" or "quirk"',
-      fav: 'Lieblinge',
-      wiki: 'Wikipedia search',
-      imgSearch: 'Images search'
+      style:'Art style',photo:'Photo',name:'artist',dates:'born - death',nation:'Nationality',
+      works:'Famous Work',bio:'Short biography',quote:'Known "Quote" or "quirk"',fav:'Lieblinge',
+      wiki:'Wikipedia search'
     };
 
-    let rows = [];
-    let byName = new Map();
-    let favOnly = false;
-
-    const els = {
-      gallery: document.getElementById('gallery'),
-      empty: document.getElementById('emptyState'),
-      detail: document.getElementById('detail'),
-      backBtn: document.getElementById('backBtn'),
-      styleFilter: document.getElementById('styleFilter'),
-      nationFilter: document.getElementById('nationFilter'),
-      search: document.getElementById('searchInput'),
-      favToggle: document.getElementById('favToggle'),
-
-      dName: document.getElementById('dName'),
-      dDates: document.getElementById('dDates'),
-      dStyle: document.getElementById('dStyle'),
-      dNation: document.getElementById('dNation'),
-      dFav: document.getElementById('dFav'),
-      dBio: document.getElementById('dBio'),
-      dWorks: document.getElementById('dWorks'),
-      dQuote: document.getElementById('dQuote'),
-      dQuoteText: document.getElementById('dQuoteText'),
-      dWiki: document.getElementById('dWiki'),
-      dImgSearch: document.getElementById('dImgSearch'),
-      dPhoto: document.getElementById('dPhoto'),
+    let rows=[],byName=new Map(),favOnly=false;
+    const els={
+      gallery:document.getElementById('gallery'),
+      detail:document.getElementById('detail'),
+      backBtn:document.getElementById('backBtn'),
+      styleFilter:document.getElementById('styleFilter'),
+      nationFilter:document.getElementById('nationFilter'),
+      search:document.getElementById('searchInput'),
+      favToggle:document.getElementById('favToggle'),
+      homeLink:document.getElementById('homeLink'),
+      dName:document.getElementById('dName'),
+      dDates:document.getElementById('dDates'),
+      dStyle:document.getElementById('dStyle'),
+      dNation:document.getElementById('dNation'),
+      dFav:document.getElementById('dFav'),
+      dBio:document.getElementById('dBio'),
+      dWorks:document.getElementById('dWorks'),
+      dQuote:document.getElementById('dQuote'),
+      dQuoteText:document.getElementById('dQuoteText'),
+      dWiki:document.getElementById('dWiki'),
+      dPhoto:document.getElementById('dPhoto'),
+      imageGallery:document.getElementById('imageGallery')
     };
 
-    function isFav(v){return v && String(v).trim().length>0;}
-    function uniqSorted(list){return Array.from(new Set(list.filter(Boolean).map(s=>String(s).trim()))).sort();}
-    function field(row,key){return row?.[key]??'';}
+    function isFav(v){return v&&String(v).trim().length>0}
+    function uniqSorted(l){return Array.from(new Set(l.filter(Boolean).map(s=>String(s).trim()))).sort()}
+    function field(r,k){return r?.[k]??''}
 
     Papa.parse(SHEET_CSV_URL,{
       download:true,header:true,skipEmptyLines:true,
       complete:(res)=>{
         rows=res.data.map(r=>({
-          style:field(r,COL.style),
-          photo:field(r,COL.photo),
-          name:field(r,COL.name),
-          dates:field(r,COL.dates),
-          nation:field(r,COL.nation),
-          works:field(r,COL.works),
-          bio:field(r,COL.bio),
-          quote:field(r,COL.quote),
-          fav:field(r,COL.fav),
-          wiki:field(r,COL.wiki),
-          imgSearch:field(r,COL.imgSearch)
-        })).filter(r=>r.name);
-        rows.forEach(r=>byName.set(r.name,r));
-        initFilters();render();
+          style:field(r,COL.style),photo:field(r,COL.photo),name:field(r,COL.name),
+          dates:field(r,COL.dates),nation:field(r,COL.nation),works:field(r,COL.works),
+          bio:field(r,COL.bio),quote:field(r,COL.quote),fav:field(r,COL.fav),wiki:field(r,COL.wiki)
+        })).filter(r=>r.name)
+        rows.forEach(r=>byName.set(r.name,r))
+        initFilters();render()
       }
-    });
+    })
 
     function initFilters(){
-      const styles=uniqSorted(rows.map(r=>r.style));
-      const nations=uniqSorted(rows.map(r=>r.nation));
-      styles.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;els.styleFilter.appendChild(o);});
-      nations.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;els.nationFilter.appendChild(o);});
-      els.styleFilter.onchange=render;
-      els.nationFilter.onchange=render;
-      els.search.oninput=render;
-      els.favToggle.onclick=()=>{favOnly=!favOnly;els.favToggle.classList.toggle('active',favOnly);render();};
-      els.backBtn.onclick=()=>{showList();};
-    }
-
-    function render(){
-      const q=els.search.value.trim().toLowerCase();
-      const fStyle=els.styleFilter.value;
-      const fNation=els.nationFilter.value;
-      const filtered=rows.filter(r=>{
-        if(fStyle&&r.style!==fStyle)return false;
-        if(fNation&&r.nation!==fNation)return false;
-        if(favOnly&&!isFav(r.fav))return false;
-        if(!q)return true;
-        return [r.name,r.style,r.nation,r.works,r.bio,r.quote].join('|').toLowerCase().includes(q);
-      });
-      els.gallery.innerHTML='';
-      filtered.forEach(r=>{
-        const card=document.createElement('article');
-        card.className='card';
-        const img=document.createElement('img');
-        img.className='thumb';
-        img.src=r.photo||'';
-        img.alt=r.name;
-        const meta=document.createElement('div');meta.className='meta';
-        meta.innerHTML=`<div class="name">${r.name}</div><div class="sub">${r.style||'–'} • ${r.nation||'–'} ${isFav(r.fav)?'<span class="badge">💖</span>':''}</div>`;
-        card.append(img,meta);
-        card.onclick=()=>showDetail(r.name);
-        els.gallery.append(card);
-      });
-      els.empty.classList.toggle('hidden',filtered.length>0);
-    }
-
-    function showDetail(name){
-      const r=byName.get(name);if(!r)return;
-      els.gallery.classList.add('hidden');els.detail.style.display='block';
-      els.dName.textContent=r.name;
-      els.dDates.textContent=r.dates||'';
-      els.dStyle.textContent=r.style||'';
-      els.dNation.textContent=r.nation||'';
-      els.dFav.classList.toggle('hidden',!isFav(r.fav));
-      els.dBio.innerHTML=r.bio?`<h3>Kurzbiografie</h3><p>${r.bio}</p>`:'';
-      els.dWorks.innerHTML=r.works?`<h3>Famous Works</h3><p>${r.works}</p>`:'';
-      if(r.quote){els.dQuote.classList.remove('hidden');els.dQuoteText.textContent=r.quote;}else{els.dQuote.classList.add('hidden');}
-      els.dWiki.href=r.wiki||'#';els.dImgSearch.href=r.imgSearch||'#';
-      els.dPhoto.src=r.photo||'';els.dPhoto.alt=r.name;
-      els.dStyle.onclick=()=>{els.styleFilter.value=r.style||'';showList();render();};
-      els.dNation.onclick=()=>{els.nationFilter.value=r.nation||'';showList();render();};
-    }
-
-    function showList(){
-      els.detail.style.display='none';els.gallery.classList.remove('hidden');
-    }
-  </script>
-</body>
-</html>
+      const styles=uniqSorted(rows.map(r=>r.style))
+      const nations=uniqSorted(rows.map(r=>r.nation))
+      styles.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;els.styleFilter.appendChild(o)})
+      nations.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;els.nationFilter.appendChild(o)})
+      els.styleFilter.onchange=render;els.nationFilter.onchange=render
+      els.search.oninput=render
+      els.favToggle.onclick=()=>{favOnly=!favOnly;els.favToggle.classList.toggle('activ
