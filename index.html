@@ -224,7 +224,8 @@
 
     async function loadArtistImages(name){
       try{
-        const q = encodeURIComponent(`${name} (art OR artwork OR painting OR canvas OR print)`)
+       const q = encodeURIComponent(`${name} artist painting OR artwork OR art OR canvas OR gallery OR museum`)
+        const url = `https://www.googleapis.com/customsearch/v1?q=${q}&cx=${GOOGLE_CX}&key=${GOOGLE_API_KEY}&searchType=image&num=10&imgType=photo&imgSize=medium&safe=off`
         const url=`https://www.googleapis.com/customsearch/v1?q=${q}&cx=${GOOGLE_CX}&key=${GOOGLE_API_KEY}&searchType=image&num=6`
         const res=await fetch(url)
         const data=await res.json()
