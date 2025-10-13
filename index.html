@@ -42,8 +42,9 @@
     .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
     .card{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);cursor:pointer}
     .card:hover{transform:translateY(-2px)}
-    .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;background:#f6f6f6}
+    .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;background:#f6f6f6;opacity:0;transition:opacity .4s ease-in}
     .meta{padding:10px 12px}
+    .thumb.loaded {opacity:1;}
     .name{font-weight:700;margin:2px 0 6px}
     .sub{color:var(--muted);font-size:12px}
     .badge{font-size:11px;color:var(--accent)}
@@ -198,11 +199,29 @@
       })
       els.gallery.innerHTML=''
       filtered.forEach(r=>{
-        const card=document.createElement('article');card.className='card'
-        card.innerHTML=`<img class="thumb" src="${r.photo}" alt="${r.name}"><div class="meta"><div class="name">${r.name}</div><div class="sub">${r.style||''} • ${r.nation||''} ${isFav(r.fav)?'💖':''}</div></div>`
-        card.onclick=()=>{showDetail(r.name,true)}
-        els.gallery.append(card)
-      })
+      const card = document.createElement('article');
+  card.className = 'card';
+
+  const img = document.createElement('img');
+  img.className = 'thumb';
+  img.loading = 'lazy';
+  img.src = r.photo;
+  img.alt = r.name;
+  img.onload = () => img.classList.add('loaded');
+
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  meta.innerHTML = `
+    <div class="name">${r.name}</div>
+    <div class="sub">${r.style || ''} • ${r.nation || ''} ${isFav(r.fav) ? '💖' : ''}</div>
+  `;
+
+  card.appendChild(img);
+  card.appendChild(meta);
+  card.onclick = () => { showDetail(r.name, true); };
+
+  els.gallery.append(card);
+});
     }
 
     function showDetail(name,push){
