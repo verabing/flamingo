@@ -300,10 +300,11 @@
       download:true,header:true,skipEmptyLines:true,
       complete:(res)=>{
         rows=res.data.map(r=>({
-          style:field(r,COL.style),photo:field(r,COL.photo),name:field(r,COL.name),
-          dates:field(r,COL.dates),nation:field(r,COL.nation),works:field(r,COL.works),
-          bio:field(r,COL.bio),quote:field(r,COL.quote),fav:field(r,COL.fav),wiki:field(r,COL.wiki)
-        })).filter(r=>r.name)
+  style:field(r,COL.style),photo:field(r,COL.photo),name:field(r,COL.name),
+  dates:field(r,COL.dates),nation:field(r,COL.nation),works:field(r,COL.works),
+  bio:field(r,COL.bio),quote:field(r,COL.quote),fav:field(r,COL.fav),
+  wiki:field(r,COL.wiki),images:field(r,COL.images)
+})).filter(r=>r.name)
         rows.forEach(r=>byName.set(r.name,r))
         initFilters();render()
       }
@@ -376,8 +377,9 @@
       els.dBio.innerHTML=r.bio?`<h3>Kurzbiografie</h3><p>${r.bio}</p>`:''
       els.dWorks.innerHTML=r.works?`<h3>Famous Works</h3><p>${r.works}</p>`:''
       if(r.quote){els.dQuote.classList.remove('hidden');els.dQuoteText.textContent=r.quote}else els.dQuote.classList.add('hidden')
-      els.dWiki.href=r.wiki||'#';els.dImages.href = r.images || '#';
-els.dImages.classList.toggle('hidden', !r.images);
+      els.dWiki.href=r.wiki||'#';els.dImages.href = r.images || `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(r.name + " artworks")}`;
+els.dImages.classList.remove('hidden');
+
 els.dPhoto.src=r.photo
       els.dStyle.onclick=()=>{els.styleFilter.value=r.style||'';showList();render()}
       els.dNation.onclick=()=>{els.nationFilter.value=r.nation||'';showList();render()}
