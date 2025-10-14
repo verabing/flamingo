@@ -288,6 +288,7 @@
       dQuote:document.getElementById('dQuote'),
       dQuoteText:document.getElementById('dQuoteText'),
       dWiki:document.getElementById('dWiki'),
+      dImages:document.getElementById('dImages'),
       dPhoto:document.getElementById('dPhoto'),
       imageGallery:document.getElementById('imageGallery')
     };
@@ -384,8 +385,9 @@ els.dPhoto.src=r.photo
       els.dStyle.onclick=()=>{els.styleFilter.value=r.style||'';showList();render()}
       els.dNation.onclick=()=>{els.nationFilter.value=r.nation||'';showList();render()}
       els.imageGallery.innerHTML=''
-      if(push)history.pushState({},'',`?artist=${encodeURIComponent(name)}`)
-      loadArtistImages(r.name)
+     if(push) history.pushState({},'',`?artist=${encodeURIComponent(name)}`);
+// loadArtistImages(r.name); // deaktivert siden vi ikke bruker API
+
     }
 
     async function loadArtistImages(name){
