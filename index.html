@@ -242,8 +242,10 @@
           <div id="dWorks" class="detail-section"></div>
           <div id="dQuote" class="detail-section hidden"><div class="quote" id="dQuoteText"></div></div>
           <div class="links">
-            <a id="dWiki" class="btn" target="_blank" rel="noopener">Wikipedia</a>
-          </div>
+          <a id="dWiki" class="btn" target="_blank" rel="noopener">Wikipedia</a>
+          <a id="dImages" class="btn" target="_blank" rel="noopener">Artworks</a>
+</div>
+
           <div id="imageGallery" class="image-gallery"></div>
         </div>
         <div><img id="dPhoto" class="detail-img" alt="Artist photo" /></div>
@@ -262,7 +264,8 @@
     const COL = {
       style:'Art style',photo:'Photo',name:'artist',dates:'born - death',nation:'Nationality',
       works:'Famous Work',bio:'Short biography',quote:'Known "Quote" or "quirk"',fav:'Lieblinge',
-      wiki:'Wikipedia search'
+      wiki:'Wikipedia search',images:'Images search'
+
     };
 
     let rows=[],byName=new Map(),favOnly=false;
@@ -373,7 +376,9 @@
       els.dBio.innerHTML=r.bio?`<h3>Kurzbiografie</h3><p>${r.bio}</p>`:''
       els.dWorks.innerHTML=r.works?`<h3>Famous Works</h3><p>${r.works}</p>`:''
       if(r.quote){els.dQuote.classList.remove('hidden');els.dQuoteText.textContent=r.quote}else els.dQuote.classList.add('hidden')
-      els.dWiki.href=r.wiki||'#';els.dPhoto.src=r.photo
+      els.dWiki.href=r.wiki||'#';els.dImages.href = r.images || '#';
+els.dImages.classList.toggle('hidden', !r.images);
+els.dPhoto.src=r.photo
       els.dStyle.onclick=()=>{els.styleFilter.value=r.style||'';showList();render()}
       els.dNation.onclick=()=>{els.nationFilter.value=r.nation||'';showList();render()}
       els.imageGallery.innerHTML=''
