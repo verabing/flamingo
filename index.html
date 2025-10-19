@@ -357,9 +357,16 @@
   const meta = document.createElement('div');
   meta.className = 'meta';
   meta.innerHTML = `
-    <div class="name">${r.name}</div>
-    <div class="sub">${r.style || ''} • ${r.nation || ''} ${isFav(r.fav) ? '💖' : ''}</div>
-  `;
+  <div class="dates" style="color:#db3553;font-size:13px;font-weight:600;margin-bottom:2px;">
+    ${r.dates || ''}
+  </div>
+  <div class="name" style="font-weight:700;font-size:16px;color:#222;margin-bottom:4px;">
+    ${r.name}
+  </div>
+  <div class="sub" style="color:#666;font-size:13px;">
+    ${r.style || ''} ${isFav(r.fav) ? '💖' : ''}
+  </div>
+`;
 
   card.appendChild(img);
   card.appendChild(meta);
