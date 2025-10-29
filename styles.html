@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Flamingo meets artist · Styles</title>
-  <a href="index.html" class="home-btn">🦩 Back to main gallery</a>
+ 
 
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
@@ -130,24 +130,25 @@
       display: none;
     }
 .home-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
   display: inline-block;
   margin: 12px auto;
   padding: 8px 16px;
   border-radius: 10px;
-  border: 1px solid var(--accent);
+  border: 1px solid #fff;
   background: #fff0f3;
-  color: var(--accent);
+  color: white;
   font-weight: 600;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: background 0.2s, color 0.2s;
   box-shadow: var(--shadow);
 }
 .home-btn:hover {
-  background: var(--accent);
-  color: #fff;
-  text-decoration: none;
-  transform: translateY(-1px);
-}
+  background: #fff;
+  color: var(--accent);
+ }
 
     footer {
       text-align:center;
@@ -211,6 +212,7 @@
 <body>
 
   <header>Flamingo by Style</header>
+  <a href="index.html" class="home-btn">🦩 Back to main gallery</a>
   <button class="back-btn" id="backBtn">← Back to styles</button>
 
   <main>
