@@ -43,25 +43,37 @@
     }
 
     /* Top-Buttons im Header */
-    .top-btn {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      padding: 8px 14px;
-      border-radius: 10px;
-      border: 1px solid #fff;
-      background: transparent;
-      color: #fff;
-      font-weight: 600;
-      text-decoration: none;
-      transition: background .2s, color .2s, transform .2s;
-      box-shadow: none;
-      z-index: 30;
-    }
-    .top-btn:hover { background:#fff; color:var(--accent); transform: translateY(-1px); }
+    /* --- Top-Buttons Container + Design --- */
+.top-buttons {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  z-index: 30;
+}
 
-    /* Zweiter Button rechts daneben */
-    #backBtn { left: 190px; display: none; }
+.top-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background .2s, color .2s, transform .2s;
+}
+.top-btn:hover {
+  background:#fff;
+  color:var(--accent);
+  transform: translateY(-1px);
+}
+
+#backBtn { display: none; }
+
+/* Mobile: Buttons untereinander */
+@media (max-width: 768px) {
 
     main {
       position: relative;
@@ -157,8 +169,11 @@
 <body>
 
   <header>Flamingo by Style</header>
+<div class="top-buttons">
   <a href="index.html" class="top-btn">🦩 Back to main gallery</a>
   <button class="top-btn" id="backBtn">← Back to styles</button>
+</div>
+
 
   <main>
     <div id="styleList" class="style-grid"></div>
