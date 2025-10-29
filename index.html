@@ -365,7 +365,12 @@
     })
 
     function initFilters(){
-      const styles=uniqSorted(rows.map(r=>r.style))
+        // Styles und Nationen einlesen
+  const styles = uniqSorted(
+    rows.flatMap(r => String(r.style || '')
+      .split(',')
+      .map(s => s.trim()))
+  );
       const nations=uniqSorted(rows.map(r=>r.nation))
       styles.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;els.styleFilter.appendChild(o)})
       nations.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;els.nationFilter.appendChild(o)})
@@ -400,10 +405,11 @@
 
   const filtered = rows.filter(r => {
     // Mehrfach-Stil-Unterstützung:
-    if (fStyle) {
-      const styles = r.style.split(',').map(s => s.trim().toLowerCase());
-      if (!styles.includes(fStyle.toLowerCase())) return false;
-    }
+   if (fStyle) {
+  const styles = r.style.split(',').map(s => s.trim().toLowerCase());
+  if (!styles.includes(fStyle.toLowerCase())) return false;
+}
+
 
     if (fNation && r.nation !== fNation) return false;
     if (favOnly && !isFav(r.fav)) return false;
