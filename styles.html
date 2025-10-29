@@ -197,31 +197,53 @@
     }
 
     function showStyle(styleName){
-      els.styleList.style.display = 'none';
-      els.galleryView.innerHTML = '';
-      els.styleTitle.textContent = styleName;
-      els.styleTitle.classList.remove('hidden');
-      els.backBtn.style.display = 'block';
+  els.styleList.style.display = 'none';
+  els.galleryView.innerHTML = '';
+  els.styleTitle.textContent = styleName;
+  els.styleTitle.classList.remove('hidden');
+  els.backBtn.style.display = 'block';
 
-      const filtered = rows.filter(r => r[COL.style] === styleName);
-      filtered.forEach(r => {
-        const img = document.createElement('img');
-        img.src = r[COL.photo];
-        img.alt = r[COL.name];
-       const left = Math.random() * 80 + 10; // Prozent
-const top = Math.random() * 70 + 5;   // etwas weniger, damit nichts abgeschnitten wird
-img.style.left = left + '%';
-img.style.top = top + '%';
-        els.galleryView.appendChild(img);
+  const filtered = rows.filter(r => r[COL.style] === styleName);
+  const placed = []; // speichert bisherige Positionen
 
-        const label = document.createElement('div');
-        label.className = 'artist-label';
-        label.textContent = r[COL.name];
-        label.style.left = `calc(${left}% + 5px)`;
-label.style.top = `calc(${top}% + 110px)`;
-        els.galleryView.appendChild(label);
-      });
-    }
+  filtered.forEach(r => {
+    const img = document.createElement('img');
+    img.src = r[COL.photo];
+    img.alt = r[COL.name];
+
+    let left, top, overlap;
+    let attempts = 0;
+
+    // Versuche bis zu 50x eine Position zu finden, die nicht kollidiert
+    do {
+      overlap = false;
+      left = Math.random() * 80 + 10; // %
+      top = Math.random() * 70 + 5;   // %
+      for (const p of placed) {
+        const dx = Math.abs(p.left - left);
+        const dy = Math.abs(p.top - top);
+        if (dx < 12 && dy < 18) { // Abstand in %: horizont/vertikal
+          overlap = true;
+          break;
+        }
+      }
+      attempts++;
+    } while (overlap && attempts < 50);
+
+    placed.push({ left, top });
+    img.style.left = left + '%';
+    img.style.top = top + '%';
+    els.galleryView.appendChild(img);
+
+    const label = document.createElement('div');
+    label.className = 'artist-label';
+    label.textContent = r[COL.name];
+    label.style.left = `calc(${left}% + 5px)`;
+    label.style.top = `calc(${top}% + 110px)`;
+    els.galleryView.appendChild(label);
+  });
+}
+
 
     els.backBtn.onclick = () => {
       els.galleryView.innerHTML = '';
