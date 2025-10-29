@@ -1,140 +1,268 @@
-<style>
-  :root {
-    --accent: #db3553;
-    --accent-weak: #fbe3e7;
-    --bg: #fff;
-    --text: #2b2b2b;
-    --muted: #666;
-    --border: #eee;
-    --shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
-    --radius: 14px;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: system-ui, Segoe UI, Roboto, Inter, sans-serif;
-    color: var(--text);
-    background: var(--bg);
-  }
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flamingo meets artist</title>
 
-  /* HEADER */
-  header {
-    position: sticky;
-    top: 0;
-    background: var(--accent);
-    color: #fff;
-    box-shadow: 0 2px 6px rgba(0,0,0,.1);
-    z-index: 10;
-  }
-  .wrap {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 18px;
-  }
-  .title {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-weight: 800;
-    font-size: 24px;
-  }
-  .flamingo-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #fff;
-  }
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 
-  /* FILTER & CONTROLS */
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-top: 10px;
-  }
-  .controls select,
-  .controls input {
-    height: 34px;
-    font-size: 0.9rem;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    padding: 0 10px;
-    width: 160px;
-  }
-  .controls input { width: 220px; }
-  .controls a {
-    padding: 8px 14px;
-    border-radius: 8px;
-    background: #fff0f3;
-    color: var(--accent);
-    font-weight: 600;
-    border: 1px solid var(--accent);
-    transition: background 0.2s;
-  }
-  .controls a:hover {
-    background: var(--accent);
-    color: white;
-    text-decoration: none;
-  }
-
-  /* MAIN GRID */
-  main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  .grid {
-    display: grid;
-    gap: 20px;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
-
-  /* 🔥 ARTIST CARD */
-  .artist-card {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    background: #fff;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
-  }
-  .artist-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  }
-  .artist-card img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    display: block;
-  }
-  .artist-info {
-    padding: 10px 14px;
-  }
-  .artist-info h3 {
-    margin: 0 0 6px;
-    font-size: 16px;
-    font-weight: 700;
-  }
-  .artist-info p {
-    margin: 0;
-    font-size: 13px;
-    color: var(--muted);
-  }
-
-  /* MOBILE */
-  @media (max-width: 768px) {
-    .controls { flex-direction: row; justify-content: center; }
-    .controls select, .controls input, .fav-toggle {
-      width: 100%;
-      max-width: 320px;
+  <style>
+    :root {
+      --accent:#db3553;
+      --accent-weak:#fbe3e7;
+      --bg:#fff;
+      --text:#2b2b2b;
+      --muted:#666;
+      --border:#eee;
+      --shadow:0 6px 24px rgba(0,0,0,.06);
+      --radius:14px;
     }
-    .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .artist-card img { height: 160px; }
-    .artist-info h3 { font-size: 14px; }
-    .artist-info p { font-size: 12px; }
+    *{box-sizing:border-box}
+    body {
+      margin:0;
+      font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif;
+      color:var(--text);
+      background:var(--bg);
+    }
+
+    header {
+      position:sticky;
+      top:0;
+      background:var(--accent);
+      color:#fff;
+      text-align:center;
+      padding:16px 8px;
+      z-index:10;
+      box-shadow:0 2px 6px rgba(0,0,0,.1);
+    }
+    header h1 {
+      margin:0;
+      font-size:24px;
+      font-weight:800;
+    }
+    header p {
+      margin:6px auto 12px;
+      max-width:800px;
+      font-size:13px;
+      color:#fce8eb;
+    }
+
+    .controls {
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:8px;
+      margin-bottom:10px;
+    }
+    .controls select,
+    .controls input {
+      height:34px;
+      font-size:14px;
+      border-radius:8px;
+      border:1px solid #ddd;
+      padding:0 10px;
+    }
+    .controls input { width:220px; }
+    .controls a {
+      display:inline-block;
+      padding:8px 14px;
+      border-radius:8px;
+      background:#fff0f3;
+      color:var(--accent);
+      font-weight:600;
+      border:1px solid var(--accent);
+      transition:.2s;
+      text-decoration:none;
+    }
+    .controls a:hover { background:var(--accent); color:#fff; }
+
+    main {
+      max-width:1200px;
+      margin:0 auto;
+      padding:20px;
+    }
+
+    .grid {
+      display:grid;
+      gap:20px;
+      grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    }
+
+    .artist-card {
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+      background:#fff;
+      box-shadow:var(--shadow);
+      transition:transform .2s ease, box-shadow .2s ease;
+      cursor:pointer;
+    }
+    .artist-card:hover {
+      transform:translateY(-4px);
+      box-shadow:0 8px 20px rgba(0,0,0,.1);
+    }
+    .artist-card img {
+      width:100%;
+      height:200px;
+      object-fit:cover;
+      display:block;
+    }
+    .artist-info { padding:10px 14px; text-align:center; }
+    .artist-info h3 {
+      margin:0 0 6px;
+      font-size:16px;
+      font-weight:700;
+    }
+    .artist-info p {
+      margin:0;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    footer {
+      text-align:center;
+      font-size:12px;
+      color:#777;
+      margin:40px auto 20px;
+      max-width:700px;
+      line-height:1.6;
+      border-top:1px solid #eee;
+      padding-top:10px;
+    }
+
+    @media(max-width:768px){
+      header h1{font-size:20px;}
+      .grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+      .artist-card img{height:160px;}
+      .artist-info h3{font-size:14px;}
+      .artist-info p{font-size:12px;}
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>• Flamingo meets artist</h1>
+    <p>
+      A personal, non-commercial AI art project – all flamingo images were generated by AI,
+      inspired by the styles of various artists. A poetic homage, not original works.
+    </p>
+    <div class="controls">
+      <select id="styleFilter"><option value="">Art Style (alle)</option></select>
+      <select id="nationFilter"><option value="">Nationality (alle)</option></select>
+      <input id="searchInput" type="search" placeholder="Search: name, style, nationality…" />
+      <a href="styles.html">🦩 Explore by style</a>
+    </div>
+  </header>
+
+  <main>
+    <section id="gallery" class="grid"></section>
+  </main>
+
+  <footer>
+    <p><strong>Disclaimer:</strong> This project is non-commercial and serves artistic and visual exploration.
+    All flamingo images were generated by AI, inspired by the styles of various artists.
+    They are free interpretations, not reproductions of existing works.</p>
+    <p>The referenced artists, data, and artwork citations come from public sources
+    (Wikipedia, Google Images, museums, art archives).
+    All rights to the original works remain with their respective rights holders.</p>
+    <p>© 2025 – Flamingo meets artist · A personal project of lived art appreciation by Frau Ke</p>
+  </footer>
+
+  <script>
+  const SHEET_CSV_URL =
+    "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
+
+  const els = {
+    container: document.getElementById("gallery"),
+    search: document.getElementById("searchInput"),
+    styleFilter: document.getElementById("styleFilter"),
+    nationFilter: document.getElementById("nationFilter")
+  };
+
+  let rows = [];
+
+  Papa.parse(SHEET_CSV_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: res => {
+      rows = res.data.filter(r => r.artist);
+      initFilters();
+      render();
+    },
+    error: err => {
+      console.error("❌ Fehler beim Laden des CSV:", err);
+    }
+  });
+
+  function uniqSorted(list) {
+    return [...new Set(list.filter(Boolean).map(s => s.trim()))].sort();
   }
-</style>
+
+  function initFilters() {
+    const styles = uniqSorted(
+      rows.flatMap(r => String(r["Art style"] || "").split(",").map(s => s.trim()))
+    );
+    const nations = uniqSorted(rows.map(r => r.nationality));
+
+    els.styleFilter.innerHTML = '<option value="">Art Style (alle)</option>';
+    els.nationFilter.innerHTML = '<option value="">Nationality (alle)</option>';
+
+    styles.forEach(s => {
+      const o = document.createElement("option");
+      o.value = s;
+      o.textContent = s;
+      els.styleFilter.appendChild(o);
+    });
+
+    nations.forEach(n => {
+      const o = document.createElement("option");
+      o.value = n;
+      o.textContent = n;
+      els.nationFilter.appendChild(o);
+    });
+
+    els.styleFilter.onchange = render;
+    els.nationFilter.onchange = render;
+    els.search.oninput = render;
+  }
+
+  function render() {
+    const fStyle = els.styleFilter.value.trim().toLowerCase();
+    const fNation = els.nationFilter.value.trim().toLowerCase();
+    const term = els.search.value.trim().toLowerCase();
+
+    const filtered = rows.filter(r => {
+      const styles = String(r["Art style"] || "")
+        .split(",")
+        .map(s => s.trim().toLowerCase());
+
+      if (fStyle && !styles.includes(fStyle)) return false;
+      if (fNation && String(r.nationality || "").trim().toLowerCase() !== fNation)
+        return false;
+
+      const txt = `${r.artist} ${r["Art style"]} ${r.nationality}`.toLowerCase();
+      return !term || txt.includes(term);
+    });
+
+    els.container.innerHTML = "";
+    filtered.forEach(r => {
+      const card = document.createElement("div");
+      card.className = "artist-card";
+      card.innerHTML = `
+        <img src="${r.Photo}" alt="${r.artist}">
+        <div class="artist-info">
+          <h3>${r.artist}</h3>
+          <p>${r["Art style"] || ""}</p>
+        </div>`;
+      els.container.appendChild(card);
+    });
+  }
+  </script>
+
+</body>
+</html>
