@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Flamingo meets artist · Styles</title>
- 
 
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
@@ -27,8 +26,8 @@
       background: var(--bg);
       color: var(--text);
       font-family: system-ui,Segoe UI,Roboto,Inter,sans-serif;
-      overflow-x: hidden;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     header {
@@ -43,10 +42,30 @@
       z-index: 10;
     }
 
+    /* Top-Buttons im Header */
+    .top-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid #fff;
+      background: transparent;
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background .2s, color .2s, transform .2s;
+      box-shadow: none;
+      z-index: 30;
+    }
+    .top-btn:hover { background:#fff; color:var(--accent); transform: translateY(-1px); }
+
+    /* Zweiter Button rechts daneben */
+    #backBtn { left: 190px; display: none; }
+
     main {
       position: relative;
-      overflow: hidden;
-      min-height: 90vh;
+      min-height: calc(100vh - 120px);
       padding: 20px;
       text-align: center;
     }
@@ -67,26 +86,25 @@
       color: var(--accent);
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background .2s;
     }
-    .style-btn:hover {
-      background: var(--accent);
-      color: #fff;
+    .style-btn:hover { background: var(--accent); color: #fff; }
+
+    .floating-gallery {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 220px); /* Spielfläche unter Header */
+      overflow: hidden;
+      margin-top: 10px;
     }
-
-
-  .floating-gallery img {
-  position: absolute;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  transition: transform 0.2s;
-}
-.floating-gallery img:hover {
-  transform: scale(1.05);
-  z-index: 2;
-}
-
+    .floating-gallery img {
+      position: absolute;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      transition: transform .2s;
+    }
+    .floating-gallery img:hover { transform: scale(1.05); z-index: 2; }
 
     .artist-label {
       position: absolute;
@@ -94,12 +112,7 @@
       font-size: 12px;
       font-weight: 600;
       text-shadow: 1px 1px 2px rgba(255,255,255,.8);
-    }
-
-    @keyframes float {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      50% { transform: translate(10px, -15px) rotate(1deg); }
-      100% { transform: translate(0, 0) rotate(0deg); }
+      pointer-events: none;
     }
 
     .center-title {
@@ -114,40 +127,6 @@
       pointer-events: none;
     }
 
-    .back-btn {
-      position: fixed;
-      top: 14px;
-      left: 14px;
-      background: #fff;
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      padding: 8px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      box-shadow: var(--shadow);
-      z-index: 20;
-      display: none;
-    }
-.home-btn {
-position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 30;
-  border: 1px solid #fff;
-  background: transparent;
-  color: #fff;
-  font-weight: 600;
-  border-radius: 8px;
-  padding: 6px 12px;
-  text-decoration: none;
-  transition: background 0.2s, color 0.2s;
-}
-.home-btn:hover {
-  background: #fff;
-  color: var(--accent);
- }
-
     footer {
       text-align:center;
       font-size:12px;
@@ -156,62 +135,30 @@ position: absolute;
       max-width:600px;
       line-height:1.6;
     }
-.hidden {
-  display: none !important;
-  visibility: hidden;
-}
-@media (max-width: 768px) {
-  header {
-    font-size: 18px;
-    padding: 10px;
-  }
 
-  .style-btn {
-    padding: 8px 12px;
-    font-size: 13px;
-    border-radius: 8px;
-  }
+    .hidden { display: none !important; }
 
-  .style-grid {
-    gap: 8px;
-    padding: 0 10px;
-  }
-
-  .center-title {
-    font-size: 26px;
-  }
-
-  .floating-gallery img {
-    width: 80px !important;
-    height: 80px !important;
-  }
-
-  .artist-label {
-    font-size: 11px;
-  }
-
-  .back-btn {
-    padding: 6px 10px;
-    font-size: 13px;
-  }
-.home-btn {
-  font-size: 13px;
-  padding: 6px 12px;
-}
-
-  footer {
-    font-size: 11px;
-    padding: 10px;
-  }
-}
-
+    @media (max-width: 768px) {
+      header { font-size: 18px; padding: 10px; }
+      .style-btn { padding: 8px 12px; font-size: 13px; border-radius: 8px; }
+      .style-grid { gap: 8px; padding: 0 10px; }
+      .center-title { font-size: 26px; }
+      /* Buttons enger */
+      .top-btn { padding: 6px 10px; font-size: 13px; }
+      #backBtn { left: 150px; }
+      /* Spielfläche kompakter, Bilder kleiner */
+      .floating-gallery { height: calc(100vh - 240px); }
+      .floating-gallery img { width: 80px !important; height: 80px !important; }
+      .artist-label { font-size: 11px; }
+      footer { font-size: 11px; padding: 10px; }
+    }
   </style>
 </head>
 <body>
 
   <header>Flamingo by Style</header>
-  <a href="index.html" class="home-btn">🦩 Back to main gallery</a>
-  <button class="back-btn" id="backBtn">← Back to styles</button>
+  <a href="index.html" class="top-btn">🦩 Back to main gallery</a>
+  <button class="top-btn" id="backBtn">← Back to styles</button>
 
   <main>
     <div id="styleList" class="style-grid"></div>
@@ -220,15 +167,13 @@ position: absolute;
   </main>
 
   <footer>
-    <p>All flamingo artworks are AI interpretations inspired by the styles of various artists.  
+    <p>All flamingo artworks are AI interpretations inspired by the styles of various artists.
     This is a non-commercial art appreciation project.</p>
   </footer>
 
   <script>
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
-    const COL = {
-      style:'Art style', photo:'Photo', name:'artist'
-    };
+    const COL = { style:'Art style', photo:'Photo', name:'artist' };
 
     const els = {
       styleList: document.getElementById('styleList'),
@@ -249,10 +194,16 @@ position: absolute;
       }
     });
 
-    function uniqSorted(l){return Array.from(new Set(l.filter(Boolean).map(s=>String(s).trim()))).sort();}
+    function uniqSorted(l){
+      return Array.from(new Set(l.filter(Boolean).map(s=>String(s).trim()))).sort();
+    }
 
+    // Styles-Liste korrekt aus Mehrfachwerten (Komma-getrennt) erzeugen
     function initStyles(){
-      const styles = uniqSorted(rows.map(r => r[COL.style]));
+      const styles = uniqSorted(
+        rows.flatMap(r => String(r[COL.style]||'').split(',').map(s => s.trim()).filter(Boolean))
+      );
+      els.styleList.innerHTML = '';
       styles.forEach(s => {
         const btn = document.createElement('button');
         btn.className = 'style-btn';
@@ -262,78 +213,81 @@ position: absolute;
       });
     }
 
-   function showStyle(styleName) {
-  els.styleList.style.display = 'none';
-  els.galleryView.innerHTML = '';
-  els.styleTitle.textContent = styleName;
-  els.styleTitle.classList.remove('hidden');
-  els.backBtn.style.display = 'block';
+    // Stil-Ansicht mit nicht-überlappender Platzierung
+    function showStyle(styleName) {
+      els.styleList.style.display = 'none';
+      els.galleryView.innerHTML = '';
+      els.styleTitle.textContent = styleName;
+      els.styleTitle.classList.remove('hidden');
+      els.backBtn.style.display = 'block';
 
-  const filtered = rows.filter(r => r[COL.style] === styleName);
-     // automatische Skalierung bei vielen Künstlern
-let imgWidth = 120;
-let imgHeight = 120;
-if (filtered.length > 20) { imgWidth = imgHeight = 90; }
-if (filtered.length > 35) { imgWidth = imgHeight = 70; }
+      const filtered = rows.filter(r =>
+        String(r[COL.style]||'')
+          .split(',')
+          .map(s => s.trim().toLowerCase())
+          .includes(styleName.toLowerCase())
+      );
 
-  const placed = [];
+      // automatische Skalierung bei vielen Künstlern
+      let imgWidth = 120, imgHeight = 120;
+      if (filtered.length > 20) { imgWidth = imgHeight = 90; }
+      if (filtered.length > 35) { imgWidth = imgHeight = 70; }
 
-  const padding = 30;    // Mindestabstand
+      const placed = [];
+      const padding = 30; // Mindestabstand
+      const area = els.galleryView.getBoundingClientRect();
+      const viewW = area.width;
+      const viewH = area.height;
 
-  // Rechne Viewportgröße um in Prozent (einfacher für CSS Positionen)
-  const viewW = window.innerWidth;
-  const viewH = window.innerHeight * 0.75; // etwas weniger, damit unten Platz bleibt
+      filtered.forEach(r => {
+        const img = document.createElement('img');
+        img.src = r[COL.photo];
+        img.alt = r[COL.name];
+        img.style.width = imgWidth + 'px';
+        img.style.height = imgHeight + 'px';
 
-    filtered.forEach(r => {
-    const img = document.createElement('img');
-    img.src = r[COL.photo];
-    img.alt = r[COL.name];
-    img.style.width = imgWidth + 'px';
-    img.style.height = imgHeight + 'px';
+        let x, y, overlap, attempts = 0;
+        do {
+          overlap = false;
+          x = Math.random() * (viewW - imgWidth - padding);
+          y = Math.random() * (viewH - imgHeight - padding);
 
-    let x, y, overlap, attempts = 0;
+          for (const p of placed) {
+            const horizontal = x < p.x + imgWidth + padding && x + imgWidth + padding > p.x;
+            const vertical   = y < p.y + imgHeight + padding && y + imgHeight + padding > p.y;
+            if (horizontal && vertical) { overlap = true; break; }
+          }
+          attempts++;
+        } while (overlap && attempts < 200);
 
-    do {
-      overlap = false;
-      x = Math.random() * (viewW - imgWidth - padding);
-      y = Math.random() * (viewH - imgHeight - padding);
+        placed.push({ x, y });
 
-      for (const p of placed) {
-        const horizontal = x < p.x + imgWidth + padding && x + imgWidth + padding > p.x;
-        const vertical = y < p.y + imgHeight + padding && y + imgHeight + padding > p.y;
-        if (horizontal && vertical) {
-          overlap = true;
-          break;
-        }
-      }
-      attempts++;
-    } while (overlap && attempts < 200);
+        img.style.left = (x / viewW * 100) + '%';
+        img.style.top  = (y / viewH * 100) + '%';
+        els.galleryView.appendChild(img);
 
-    placed.push({ x, y });
+        const label = document.createElement('div');
+        label.className = 'artist-label';
+        label.textContent = r[COL.name];
+        label.style.left = `calc(${x / viewW * 100}% + 4px)`;
+        label.style.top  = `calc(${y / viewH * 100}% + ${imgHeight + 6}px)`;
+        els.galleryView.appendChild(label);
+      });
+    }
 
-    img.style.left = (x / viewW * 100) + '%';
-    img.style.top = (y / viewH * 100) + '%';
-    els.galleryView.appendChild(img);
+    // Zurück zur Übersicht aller Styles
+    function showList() {
+      els.galleryView.innerHTML = '';
+      els.styleList.style.display = 'flex';
+      els.styleTitle.classList.add('hidden');
+      els.styleTitle.textContent = '';
+      els.backBtn.style.display = 'none';
+      // Neu aufbauen (falls sich Daten geändert haben)
+      initStyles();
+    }
 
-    const label = document.createElement('div');
-    label.className = 'artist-label';
-    label.textContent = r[COL.name];
-    label.style.left = `calc(${x / viewW * 100}% + 4px)`;
-    label.style.top = `calc(${y / viewH * 100}% + ${imgHeight + 6}px)`;
-    els.galleryView.appendChild(label);
-  });
-
-  // Button "Back to styles" funktioniert jetzt wieder
-  els.backBtn.onclick = () => {
-    els.galleryView.innerHTML = '';
-    els.styleTitle.textContent = '';
-    els.styleTitle.classList.add('hidden');
-    els.styleList.style.display = 'flex';
-    els.backBtn.style.display = 'none';
-  };
-}
-
-
+    // Button aktivieren
+    els.backBtn.onclick = showList;
   </script>
 </body>
 </html>
