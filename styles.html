@@ -261,57 +261,45 @@ if (filtered.length > 35) { imgWidth = imgHeight = 70; }
   const viewH = window.innerHeight * 0.75; // etwas weniger, damit unten Platz bleibt
 
   filtered.forEach(r => {
-    const img = document.createElement('img');
-    img.src = r[COL.photo];
-    img.alt = r[COL.name];
-    img.style.width = imgWidth + 'px';
-    img.style.height = imgHeight + 'px';
+  const img = document.createElement('img');
+  img.src = r[COL.photo];
+  img.alt = r[COL.name];
+  img.style.width = imgWidth + 'px';
+  img.style.height = imgHeight + 'px';
 
-    let x, y, overlap, attempts = 0;
+  let x, y, overlap, attempts = 0;
 
-    // Position finden, die nicht überlappt
-    do {
-      overlap = false;
-      x = Math.random() * (viewW - imgWidth - padding);
-      y = Math.random() * (viewH - imgHeight - padding);
-      for (const p of placed) {
-        const dx = p.x - x;
-        const dy = p.y - y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < imgWidth + padding) { // falls zu nah, neu versuchen
-          overlap = true;
-          break;
-        }
+  // realistische Platzprüfung – prüft Flächen, nicht nur Mittelpunkte
+  do {
+    overlap = false;
+    x = Math.random() * (viewW - imgWidth - padding);
+    y = Math.random() * (viewH - imgHeight - padding);
+
+    for (const p of placed) {
+      const horizontal = x < p.x + imgWidth + padding && x + imgWidth + padding > p.x;
+      const vertical   = y < p.y + imgHeight + padding && y + imgHeight + padding > p.y;
+      if (horizontal && vertical) {
+        overlap = true;
+        break;
       }
-      attempts++;
-    } while (overlap && attempts < 100);
+    }
+    attempts++;
+  } while (overlap && attempts < 200);
 
-    placed.push({ x, y });
+  placed.push({ x, y });
 
-    // Position setzen in Prozent (besser für Responsive)
-    img.style.left = (x / viewW * 100) + '%';
-    img.style.top = (y / viewH * 100) + '%';
-    els.galleryView.appendChild(img);
+  img.style.left = (x / viewW * 100) + '%';
+  img.style.top = (y / viewH * 100) + '%';
+  els.galleryView.appendChild(img);
 
-    // Name darunter
-    const label = document.createElement('div');
-    label.className = 'artist-label';
-    label.textContent = r[COL.name];
-    label.style.left = `calc(${x / viewW * 100}% + 5px)`;
-    label.style.top = `calc(${y / viewH * 100}% + ${imgHeight + 5}px)`;
-    els.galleryView.appendChild(label);
-  });
-}
+  const label = document.createElement('div');
+  label.className = 'artist-label';
+  label.textContent = r[COL.name];
+  label.style.left = `calc(${x / viewW * 100}% + 4px)`;
+  label.style.top = `calc(${y / viewH * 100}% + ${imgHeight + 6}px)`;
+  els.galleryView.appendChild(label);
+});
 
-
-
-els.backBtn.onclick = () => {
-  els.galleryView.innerHTML = '';
-  els.styleTitle.textContent = ''; // <— leert den Text
-  els.styleTitle.classList.add('hidden');
-  els.styleList.style.display = 'flex';
-  els.backBtn.style.display = 'none';
-};
   </script>
 </body>
 </html>
