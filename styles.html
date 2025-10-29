@@ -245,12 +245,13 @@
 }
 
 
-    els.backBtn.onclick = () => {
-      els.galleryView.innerHTML = '';
-      els.styleTitle.classList.add('hidden');
-      els.styleList.style.display = 'flex';
-      els.backBtn.style.display = 'none';
-    };
+els.backBtn.onclick = () => {
+  els.galleryView.innerHTML = '';
+  els.styleTitle.textContent = ''; // <— leert den Text
+  els.styleTitle.classList.add('hidden');
+  els.styleList.style.display = 'flex';
+  els.backBtn.style.display = 'none';
+};
   </script>
 </body>
 </html>
