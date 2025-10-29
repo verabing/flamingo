@@ -72,23 +72,20 @@
       background: var(--accent);
       color: #fff;
     }
-.floating-gallery {
-  position: relative;
-  width: 100%;
-  height: calc(100vh - 180px); /* nutzt den verfügbaren Platz unter dem Header */
-  overflow: hidden;
+
+
+  .floating-gallery img {
+  position: absolute;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+}
+.floating-gallery img:hover {
+  transform: scale(1.05);
+  z-index: 2;
 }
 
-    .floating-gallery img {
-      position: absolute;
-      width: 120px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      transition: transform 6s ease-in-out;
-      animation: float 10s ease-in-out infinite;
-    }
 
     .artist-label {
       position: absolute;
@@ -143,6 +140,46 @@
 .hidden {
   display: none !important;
   visibility: hidden;
+}
+@media (max-width: 768px) {
+  header {
+    font-size: 18px;
+    padding: 10px;
+  }
+
+  .style-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+
+  .style-grid {
+    gap: 8px;
+    padding: 0 10px;
+  }
+
+  .center-title {
+    font-size: 26px;
+  }
+
+  .floating-gallery img {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .artist-label {
+    font-size: 11px;
+  }
+
+  .back-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  footer {
+    font-size: 11px;
+    padding: 10px;
+  }
 }
 
   </style>
@@ -201,7 +238,7 @@
       });
     }
 
-    function showStyle(styleName){
+   function showStyle(styleName) {
   els.styleList.style.display = 'none';
   els.galleryView.innerHTML = '';
   els.styleTitle.textContent = styleName;
@@ -209,45 +246,63 @@
   els.backBtn.style.display = 'block';
 
   const filtered = rows.filter(r => r[COL.style] === styleName);
-  const placed = []; // speichert bisherige Positionen
+     // automatische Skalierung bei vielen Künstlern
+let imgWidth = 120;
+let imgHeight = 120;
+if (filtered.length > 20) { imgWidth = imgHeight = 90; }
+if (filtered.length > 35) { imgWidth = imgHeight = 70; }
+
+  const placed = [];
+
+  const padding = 30;    // Mindestabstand
+
+  // Rechne Viewportgröße um in Prozent (einfacher für CSS Positionen)
+  const viewW = window.innerWidth;
+  const viewH = window.innerHeight * 0.75; // etwas weniger, damit unten Platz bleibt
 
   filtered.forEach(r => {
     const img = document.createElement('img');
     img.src = r[COL.photo];
     img.alt = r[COL.name];
+    img.style.width = imgWidth + 'px';
+    img.style.height = imgHeight + 'px';
 
-    let left, top, overlap;
-    let attempts = 0;
+    let x, y, overlap, attempts = 0;
 
-    // Versuche bis zu 50x eine Position zu finden, die nicht kollidiert
+    // Position finden, die nicht überlappt
     do {
       overlap = false;
-      left = Math.random() * 80 + 10; // %
-      top = Math.random() * 70 + 5;   // %
+      x = Math.random() * (viewW - imgWidth - padding);
+      y = Math.random() * (viewH - imgHeight - padding);
       for (const p of placed) {
-        const dx = Math.abs(p.left - left);
-        const dy = Math.abs(p.top - top);
-        if (dx < 12 && dy < 18) { // Abstand in %: horizont/vertikal
+        const dx = p.x - x;
+        const dy = p.y - y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < imgWidth + padding) { // falls zu nah, neu versuchen
           overlap = true;
           break;
         }
       }
       attempts++;
-    } while (overlap && attempts < 50);
+    } while (overlap && attempts < 100);
 
-    placed.push({ left, top });
-    img.style.left = left + '%';
-    img.style.top = top + '%';
+    placed.push({ x, y });
+
+    // Position setzen in Prozent (besser für Responsive)
+    img.style.left = (x / viewW * 100) + '%';
+    img.style.top = (y / viewH * 100) + '%';
     els.galleryView.appendChild(img);
 
+    // Name darunter
     const label = document.createElement('div');
     label.className = 'artist-label';
     label.textContent = r[COL.name];
-    label.style.left = `calc(${left}% + 5px)`;
-    label.style.top = `calc(${top}% + 110px)`;
+    label.style.left = `calc(${x / viewW * 100}% + 5px)`;
+    label.style.top = `calc(${y / viewH * 100}% + ${imgHeight + 5}px)`;
     els.galleryView.appendChild(label);
   });
 }
+
 
 
 els.backBtn.onclick = () => {
