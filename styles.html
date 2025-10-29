@@ -171,123 +171,126 @@
     This is a non-commercial art appreciation project.</p>
   </footer>
 
-  <script>
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
-    const COL = { style:'Art style', photo:'Photo', name:'artist' };
+ <script>
+  const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
+  const COL = { style: 'Art style', photo: 'Photo', name: 'artist' };
 
-    const els = {
-      styleList: document.getElementById('styleList'),
-      galleryView: document.getElementById('galleryView'),
-      styleTitle: document.getElementById('styleTitle'),
-      backBtn: document.getElementById('backBtn')
-    };
+  const els = {
+    styleList: document.getElementById('styleList'),
+    galleryView: document.getElementById('galleryView'),
+    styleTitle: document.getElementById('styleTitle'),
+    backBtn: document.getElementById('backBtn')
+  };
 
-    let rows = [];
+  let rows = [];
 
-    Papa.parse(SHEET_CSV_URL, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      complete: res => {
-        rows = res.data.filter(r => r[COL.name]);
-        initStyles();
-      }
-    });
-
-    function uniqSorted(l){
-      return Array.from(new Set(l.filter(Boolean).map(s=>String(s).trim()))).sort();
-    }
-
-    // Styles-Liste korrekt aus Mehrfachwerten (Komma-getrennt) erzeugen
-    function initStyles(){
-      const styles = uniqSorted(
-        rows.flatMap(r => String(r[COL.style]||'').split(',').map(s => s.trim()).filter(Boolean))
-      );
-      els.styleList.innerHTML = '';
-      styles.forEach(s => {
-        const btn = document.createElement('button');
-        btn.className = 'style-btn';
-        btn.textContent = s;
-        btn.onclick = () => showStyle(s);
-        els.styleList.appendChild(btn);
-      });
-    }
-
-    // Stil-Ansicht mit nicht-überlappender Platzierung
-    function showStyle(styleName) {
-      els.styleList.style.display = 'none';
-      els.galleryView.innerHTML = '';
-      els.styleTitle.textContent = styleName;
-      els.styleTitle.classList.remove('hidden');
-      els.backBtn.style.display = 'block';
-
-      const filtered = rows.filter(r =>
-        String(r[COL.style]||'')
-          .split(',')
-          .map(s => s.trim().toLowerCase())
-          .includes(styleName.toLowerCase())
-      );
-
-      // automatische Skalierung bei vielen Künstlern
-      let imgWidth = 120, imgHeight = 120;
-      if (filtered.length > 20) { imgWidth = imgHeight = 90; }
-      if (filtered.length > 35) { imgWidth = imgHeight = 70; }
-
-      const placed = [];
-      const padding = 30; // Mindestabstand
-      const area = els.galleryView.getBoundingClientRect();
-      const viewW = area.width;
-      const viewH = area.height;
-
-      filtered.forEach(r => {
-        const img = document.createElement('img');
-        img.src = r[COL.photo];
-        img.alt = r[COL.name];
-        img.style.width = imgWidth + 'px';
-        img.style.height = imgHeight + 'px';
-
-        let x, y, overlap, attempts = 0;
-        do {
-          overlap = false;
-          x = Math.random() * (viewW - imgWidth - padding);
-          y = Math.random() * (viewH - imgHeight - padding);
-
-          for (const p of placed) {
-            const horizontal = x < p.x + imgWidth + padding && x + imgWidth + padding > p.x;
-            const vertical   = y < p.y + imgHeight + padding && y + imgHeight + padding > p.y;
-            if (horizontal && vertical) { overlap = true; break; }
-          }
-          attempts++;
-        } while (overlap && attempts < 200);
-
-        placed.push({ x, y });
-
-        img.style.left = (x / viewW * 100) + '%';
-        img.style.top  = (y / viewH * 100) + '%';
-        els.galleryView.appendChild(img);
-
-        const label = document.createElement('div');
-        label.className = 'artist-label';
-        label.textContent = r[COL.name];
-        label.style.left = `calc(${x / viewW * 100}% + 4px)`;
-        label.style.top  = `calc(${y / viewH * 100}% + ${imgHeight + 6}px)`;
-        els.galleryView.appendChild(label);
-      });
-    }
-
-    // Zurück zur Übersicht aller Styles
-    function showList() {
-      els.galleryView.innerHTML = '';
-      els.styleList.style.display = 'flex';
-      els.styleTitle.classList.add('hidden');
-      els.styleTitle.textContent = '';
-      els.backBtn.style.display = 'none';
-      // Neu aufbauen (falls sich Daten geändert haben)
+  Papa.parse(SHEET_CSV_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: res => {
+      rows = res.data.filter(r => r[COL.name]);
       initStyles();
     }
+  });
 
-    // Button aktivieren
-    els.backBtn.onclick = showList;
-  </script>
+  function uniqSorted(list) {
+    return [...new Set(list.filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  }
+
+  // 🔥 Styles korrekt aufsplitten, trimmen und vereinheitlichen
+  function initStyles() {
+    const styles = uniqSorted(
+      rows.flatMap(r =>
+        String(r[COL.style] || "")
+          .split(",")
+          .map(s => s.trim())
+          .filter(Boolean)
+      )
+    );
+
+    els.styleList.innerHTML = "";
+    styles.forEach(s => {
+      const btn = document.createElement("button");
+      btn.className = "style-btn";
+      btn.textContent = s;
+      btn.onclick = () => showStyle(s);
+      els.styleList.appendChild(btn);
+    });
+  }
+
+  function showStyle(styleName) {
+    els.styleList.style.display = "none";
+    els.galleryView.innerHTML = "";
+    els.styleTitle.textContent = styleName;
+    els.styleTitle.classList.remove("hidden");
+    els.backBtn.style.display = "block";
+
+    const filtered = rows.filter(r =>
+      String(r[COL.style] || "")
+        .split(",")
+        .map(s => s.trim().toLowerCase())
+        .includes(styleName.toLowerCase())
+    );
+
+    // Automatische Skalierung
+    let imgWidth = 120,
+      imgHeight = 120;
+    if (filtered.length > 20) imgWidth = imgHeight = 90;
+    if (filtered.length > 35) imgWidth = imgHeight = 70;
+
+    const placed = [];
+    const padding = 30;
+    const area = els.galleryView.getBoundingClientRect();
+    const viewW = area.width;
+    const viewH = area.height;
+
+    filtered.forEach(r => {
+      const img = document.createElement("img");
+      img.src = r[COL.photo];
+      img.alt = r[COL.name];
+      img.style.width = imgWidth + "px";
+      img.style.height = imgHeight + "px";
+
+      let x, y, overlap, attempts = 0;
+      do {
+        overlap = false;
+        x = Math.random() * (viewW - imgWidth - padding);
+        y = Math.random() * (viewH - imgHeight - padding);
+
+        for (const p of placed) {
+          const horizontal = x < p.x + imgWidth + padding && x + imgWidth + padding > p.x;
+          const vertical = y < p.y + imgHeight + padding && y + imgHeight + padding > p.y;
+          if (horizontal && vertical) { overlap = true; break; }
+        }
+        attempts++;
+      } while (overlap && attempts < 200);
+
+      placed.push({ x, y });
+
+      img.style.left = (x / viewW * 100) + "%";
+      img.style.top = (y / viewH * 100) + "%";
+      els.galleryView.appendChild(img);
+
+      const label = document.createElement("div");
+      label.className = "artist-label";
+      label.textContent = r[COL.name];
+      label.style.left = `calc(${x / viewW * 100}% + 4px)`;
+      label.style.top = `calc(${y / viewH * 100}% + ${imgHeight + 6}px)`;
+      els.galleryView.appendChild(label);
+    });
+  }
+
+  function showList() {
+    els.galleryView.innerHTML = "";
+    els.styleList.style.display = "flex";
+    els.styleTitle.classList.add("hidden");
+    els.styleTitle.textContent = "";
+    els.backBtn.style.display = "none";
+  }
+
+  els.backBtn.onclick = showList;
+</script>
+
 </body>
 </html>
