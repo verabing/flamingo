@@ -1,426 +1,140 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-<link rel="icon" href="favicon.ico" type="image/x-icon">
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-
-
-  <title>Flamingo meets artist</title>
-
-  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
-
-  <style>
-    :root{
-      --accent:#db3553;
-      --accent-weak:#fbe3e7;
-      --bg:#fff;
-      --text:#2b2b2b;
-      --muted:#666;
-      --border:#eee;
-      --shadow:0 6px 24px rgba(0,0,0,.06);
-      --radius:14px;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif;color:var(--text);background:var(--bg)}
-    a{color:var(--accent);text-decoration:none}
-    a:hover{text-decoration:underline}
-
-    /* Header */
-    header{position:sticky;top:0;z-index:10;background:var(--accent);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-    .wrap{max-width:1200px;margin:0 auto;padding:18px}
-    .title{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:800;font-size:24px;cursor:pointer}
-    .flamingo-dot{width:12px;height:12px;border-radius:50%;background:#fff}
-/* ---- Kompaktere Steuerleiste ---- */
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 10px;
-  padding: 0 1rem;
-}
-
-.controls select,
-.controls input {
-  height: 34px;
-  font-size: 0.9rem;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  padding: 0 10px;
-  width: 160px;
-}
-
-.controls input {
-  width: 220px;
-}
-.controls a {
-  padding: 8px 14px;
-  border-radius: 8px;
-  background: #fff0f3;
-  color: var(--accent);
-  font-weight: 600;
-  border: 1px solid var(--accent);
-  transition: background 0.2s;
-}
-.controls a:hover {
-  background: var(--accent);
-  color: white;
-  text-decoration: none;
-}
-.controls a.style-link {
-  padding: 8px 14px;
-  border-radius: 8px;
-  background: #fff0f3;
-  color: var(--accent);
-  font-weight: 600;
-  border: 1px solid var(--accent);
-  transition: background 0.2s;
-}
-.controls a.style-link:hover {
-  background: var(--accent);
-  color: white;
-  text-decoration: none;
-}
-
-.fav-toggle {
-  height: 34px;
-  width: 40px;
-  border-radius: 8px;
-  border: none;
-  background-color: #f6c3cc;
-  color: #db3553;
-  cursor: pointer;
-  font-size: 1.1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-.fav-toggle:hover {
-  background-color: #db3553;
-  color: white;
-}
-
-/* ---- Mobile Ansicht ---- */
-@media (max-width: 768px) {
-  .controls {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
+<style>
+  :root {
+    --accent: #db3553;
+    --accent-weak: #fbe3e7;
+    --bg: #fff;
+    --text: #2b2b2b;
+    --muted: #666;
+    --border: #eee;
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+    --radius: 14px;
   }
-  .controls select,
-  .controls input,
-  .fav-toggle {
-    width: 100%;
-    max-width: 320px;
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, Segoe UI, Roboto, Inter, sans-serif;
+    color: var(--text);
+    background: var(--bg);
   }
-.detail-title {
-  font-size: 22px;
-}
 
-.detail-img {
-  max-height: 300px;
-}
-
-.detail-sub {
-  font-size: 13px;
-}
-
-.btn {
-  padding: 6px 10px;
-  font-size: 13px;
-}
-
-.image-gallery img {
-  width: 90px;
-  height: 90px;
-}
-
-}
-
-    
-    .fav-toggle{grid-column:span 3;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
-      background:#fff0f3;color:var(--accent);font-weight:600}
-    .fav-toggle.active{border:2px solid #fff}
-
-    main{max-width:1200px;margin:0 auto;padding:18px}
-    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
-    .card{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);cursor:pointer}
-    .card:hover{transform:translateY(-2px)}
-    .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;background:#f6f6f6;opacity:0;transition:opacity .4s ease-in}
-    .meta{padding:10px 12px}
-    .thumb.loaded {opacity:1;}
-    .name{font-weight:700;margin:2px 0 6px}
-    .sub{color:var(--muted);font-size:12px}
-    .badge{font-size:11px;color:var(--accent)}
-
-    .detail{max-width:900px;margin:0 auto;display:none}
-    .back{margin:6px 0 16px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer}
-    .detail-head{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
-    @media(max-width:880px){.detail-head{grid-template-columns:1fr}}
-    .detail-title{margin:0;font-size:28px;font-weight:900}
-    .detail-sub{color:var(--muted);margin:8px 0 14px}
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-    .chip{font-size:12px;border:1px solid var(--border);padding:5px 10px;border-radius:999px;background:#fff;cursor:pointer}
-    .chip:hover{border-color:var(--accent);color:var(--accent)}
-    .detail-img{width:100%;border-radius:12px;border:1px solid var(--border);background:#f6f6f6;object-fit:cover;max-height:520px}
-    .detail-section{margin:18px 0}
-    .quote{border-left:4px solid var(--accent);padding:10px 12px;background:#fff;border-radius:8px;font-style:italic}
-    .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
-    .btn{padding:9px 12px;border-radius:10px;border:1px solid var(--accent);color:var(--accent);background:#fff;font-weight:600}
-    .image-gallery{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-    .image-gallery img{width:120px;height:120px;object-fit:cover;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-    .hidden{display:none!important}
-    /* ---- MOBILE OPTIMIERUNG ---- */
-@media (max-width: 768px) {
+  /* HEADER */
   header {
-    padding: 8px 0;
+    position: sticky;
+    top: 0;
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,.1);
+    z-index: 10;
   }
-
   .wrap {
-    padding: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px;
   }
-
   .title {
-    font-size: 18px;
-    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 24px;
+  }
+  .flamingo-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
   }
 
-  header p {
-    display: none; /* Beschreibung ausblenden auf Handy */
-  }
-
+  /* FILTER & CONTROLS */
   .controls {
-    flex-direction: row;
+    display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 6px;
+    gap: 0.5rem;
+    margin-top: 10px;
   }
-
   .controls select,
-  .controls input,
-  .fav-toggle {
+  .controls input {
     height: 34px;
-    width: 48%;
-    font-size: 13px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 0 10px;
+    width: 160px;
+  }
+  .controls input { width: 220px; }
+  .controls a {
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: #fff0f3;
+    color: var(--accent);
+    font-weight: 600;
+    border: 1px solid var(--accent);
+    transition: background 0.2s;
+  }
+  .controls a:hover {
+    background: var(--accent);
+    color: white;
+    text-decoration: none;
   }
 
-  .fav-toggle {
-    width: 34px;
-    min-width: 34px;
-    padding: 0;
-    font-size: 16px;
-  }
-
+  /* MAIN GRID */
   main {
-    padding: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
   }
-
   .grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 Spalten */
-    gap: 10px;
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 
-  .card {
-    border-radius: 10px;
-    box-shadow: none;
+  /* 🔥 ARTIST CARD */
+  .artist-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    background: #fff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
   }
-
-  .thumb {
-    aspect-ratio: 1/1;
+  .artist-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  }
+  .artist-card img {
+    width: 100%;
+    height: 200px;
     object-fit: cover;
-    max-height: 180px;
+    display: block;
+  }
+  .artist-info {
+    padding: 10px 14px;
+  }
+  .artist-info h3 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .artist-info p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
   }
 
-  .meta {
-    padding: 6px;
-  }
-
-  .name {
-    font-size: 14px;
-  }
-
-  .sub {
-    font-size: 11px;
-  }
-}
-
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="wrap">
-      <div class="title" id="homeLink">
-        <span class="flamingo-dot"></span>Flamingo meets artist
-      </div>
-<p style="text-align:center;font-size:13px;color:#fce8eb;margin:6px 0 14px;max-width:800px;margin-left:auto;margin-right:auto;">
-      <em>
-      A personal, non-commercial online AI art project: All flamingo images were generated by AI – inspired by the styles of the respective artists. 
-        They are a poetic homage, not original works. Following the playful poetic idea: “If XX had painted a flamingo, what might it look like?”
-      </em>
-    </p>
-      <div class="controls">
-        <select id="styleFilter"><option value="">Art Style (alle)</option></select>
-        <select id="nationFilter"><option value="">Nationality (alle)</option></select>
-        <input id="searchInput" type="search" placeholder="Search: name, style, nationality …" />
-        <button id="favToggle" class="fav-toggle" type="button">💖</button>
-<a href="styles.html" style="color:white;text-decoration:underline;font-weight:600;">🦩Explore by style</a>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <section id="gallery" class="grid"></section>
-
-    <section id="detail" class="detail">
-      <button class="back" id="backBtn">← Zurück</button>
-      <div class="detail-head">
-        <div>
-          <h1 id="dName" class="detail-title"></h1>
-          <div id="dDates" class="detail-sub"></div>
-          <div class="chips">
-            <span id="dStyle" class="chip"></span>
-            <span id="dNation" class="chip"></span>
-            <span id="dFav" class="badge hidden">💖 Liebling</span>
-          </div>
-          <div id="dBio" class="detail-section"></div>
-          <div id="dWorks" class="detail-section"></div>
-          <div id="dQuote" class="detail-section hidden"><div class="quote" id="dQuoteText"></div></div>
-          <div class="links">
-          <a id="dWiki" class="btn" target="_blank" rel="noopener">Wikipedia</a>
-          <a id="dImages" class="btn" target="_blank" rel="noopener">Artworks</a>
-</div>
-
-          <div id="imageGallery" class="image-gallery"></div>
-        </div>
-        <div><img id="dPhoto" class="detail-img" alt="Artist photo" /></div>
-      </div>
-    </section>
-  </main>
-
-  <script>
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
-const els = {
-  container: document.getElementById("gallery"),
-  search: document.getElementById("searchInput"),
-  styleFilter: document.getElementById("styleFilter"),
-  nationFilter: document.getElementById("nationFilter"),
-};
-
-
-let rows = [];
-
-Papa.parse(SHEET_CSV_URL, {
-  download: true,
-  header: true,
-  skipEmptyLines: true,
-  complete: res => {
-    console.log("✅ CSV geladen, Zeilen:", res.data.length);
-    console.log("🔍 Erste Zeile:", res.data[0]);
-
-    rows = res.data.filter(r => r.artist);
-    console.log("🎨 Gefilterte Künstler:", rows.length);
-
-    initFilters();
-    render();
-  },
-  error: err => {
-    console.error("❌ Fehler beim Laden des CSV:", err);
-  }
-});
-
-function uniqSorted(list) {
-  return [...new Set(list.filter(Boolean).map(s => s.trim()))].sort();
-}
-
-function initFilters() {
-  const styles = uniqSorted(
-    rows.flatMap(r => String(r["Art style"] || "").split(",").map(s => s.trim()))
-  );
-  const nations = uniqSorted(rows.map(r => r.nationality));
-
-  els.styleFilter.innerHTML = '<option value="">Art Style (alle)</option>';
-  els.nationFilter.innerHTML = '<option value="">Nationality (alle)</option>';
-
-  styles.forEach(s => {
-    const o = document.createElement("option");
-    o.value = s;
-    o.textContent = s;
-    els.styleFilter.appendChild(o);
-  });
-
-  nations.forEach(n => {
-    const o = document.createElement("option");
-    o.value = n;
-    o.textContent = n;
-    els.nationFilter.appendChild(o);
-  });
-
-  els.styleFilter.onchange = render;
-  els.nationFilter.onchange = render;
-  els.search.oninput = render;
-  els.search.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      render();
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .controls { flex-direction: row; justify-content: center; }
+    .controls select, .controls input, .fav-toggle {
+      width: 100%;
+      max-width: 320px;
     }
-  });
-}
-
-function render() {
-  const fStyle = els.styleFilter.value.trim().toLowerCase();
-  const fNation = els.nationFilter.value.trim().toLowerCase();
-  const term = els.search.value.trim().toLowerCase();
-
-  const filtered = rows.filter(r => {
-    const styles = String(r["Art style"] || "")
-      .split(",")
-      .map(s => s.trim().toLowerCase());
-
-    if (fStyle && !styles.includes(fStyle)) return false;
-    if (fNation && String(r.nationality || "").trim().toLowerCase() !== fNation)
-      return false;
-
-    const txt = `${r.artist} ${r["Art style"]} ${r.nationality}`.toLowerCase();
-    return !term || txt.includes(term);
-  });
-
-  els.container.innerHTML = "";
-  filtered.forEach(r => {
-    const card = document.createElement("div");
-    card.className = "artist-card";
-
-    card.innerHTML = `
-      <img src="${r.Photo}" alt="${r.artist}">
-      <div class="artist-info">
-        <h3>${r.artist}</h3>
-        <p>${r["Art style"] || ""}</p>
-      </div>
-    `;
-    card.onclick = () => {
-      const url = `artist.html?artist=${encodeURIComponent(r.artist)}`;
-      window.location.href = url;
-    };
-
-    els.container.appendChild(card);
-  });
-}
-</script>
-
-<footer style="margin:50px auto 20px;text-align:center;font-size:12px;color:#777;max-width:720px;padding:20px 10px;border-top:1px solid #eee;line-height:1.6;">
-  <p><strong>Disclaimer:</strong> This project is non-commercial and serves artistic and visual exploration. 
-    All flamingo images were generated by AI, inspired by the styles of various artists. They are free interpretations, not reproductions of existing works.</p>
-
-  <p>The referenced artists, data, and artwork citations come from public sources (Wikipedia, Google Images, museums, art archives). 
-    All rights to the original works remain with their respective rights holders.</p>
-
-  <p style="margin-top:8px;">© 2025 – Flamingo meets artist · A personal project of lived art appreciation by Frau Ke</p>
-</footer>
-
-</body>
-</html>
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .artist-card img { height: 160px; }
+    .artist-info h3 { font-size: 14px; }
+    .artist-info p { font-size: 12px; }
+  }
+</style>
