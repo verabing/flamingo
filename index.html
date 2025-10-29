@@ -395,8 +395,30 @@
   render();
   history.pushState({},'',location.pathname);
 }
-      window.onpopstate=()=>{if(location.search.startsWith('?artist=')){const n=new URLSearchParams(location.search).get('artist');showDetail(n,false)}else showList()}
-    }
+     window.onpopstate = () => {
+  const params = new URLSearchParams(location.search);
+  const artist = params.get('artist');
+  const style = params.get('style');
+  const nation = params.get('nation');
+
+  if (artist) {
+    showDetail(decodeURIComponent(artist), false);
+  } else if (style) {
+    els.styleFilter.value = style;
+    showList();
+    render();
+  } else if (nation) {
+    els.nationFilter.value = nation;
+    showList();
+    render();
+  } else {
+    els.styleFilter.value = '';
+    els.nationFilter.value = '';
+    showList();
+    render();
+  }
+};
+
 
  function render() {
   const q = removeDiacritics(els.search.value.trim().toLowerCase());
