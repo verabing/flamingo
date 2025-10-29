@@ -130,20 +130,18 @@
       display: none;
     }
 .home-btn {
-  position: absolute;
+position: absolute;
   top: 10px;
   left: 10px;
-  display: inline-block;
-  margin: 12px auto;
-  padding: 8px 16px;
-  border-radius: 10px;
+  z-index: 30;
   border: 1px solid #fff;
-  background: #fff0f3;
-  color: white;
+  background: transparent;
+  color: #fff;
   font-weight: 600;
+  border-radius: 8px;
+  padding: 6px 12px;
   text-decoration: none;
   transition: background 0.2s, color 0.2s;
-  box-shadow: var(--shadow);
 }
 .home-btn:hover {
   background: #fff;
@@ -286,45 +284,55 @@ if (filtered.length > 35) { imgWidth = imgHeight = 70; }
   const viewW = window.innerWidth;
   const viewH = window.innerHeight * 0.75; // etwas weniger, damit unten Platz bleibt
 
-  filtered.forEach(r => {
-  const img = document.createElement('img');
-  img.src = r[COL.photo];
-  img.alt = r[COL.name];
-  img.style.width = imgWidth + 'px';
-  img.style.height = imgHeight + 'px';
+    filtered.forEach(r => {
+    const img = document.createElement('img');
+    img.src = r[COL.photo];
+    img.alt = r[COL.name];
+    img.style.width = imgWidth + 'px';
+    img.style.height = imgHeight + 'px';
 
-  let x, y, overlap, attempts = 0;
+    let x, y, overlap, attempts = 0;
 
-  // realistische Platzprüfung – prüft Flächen, nicht nur Mittelpunkte
-  do {
-    overlap = false;
-    x = Math.random() * (viewW - imgWidth - padding);
-    y = Math.random() * (viewH - imgHeight - padding);
+    do {
+      overlap = false;
+      x = Math.random() * (viewW - imgWidth - padding);
+      y = Math.random() * (viewH - imgHeight - padding);
 
-    for (const p of placed) {
-      const horizontal = x < p.x + imgWidth + padding && x + imgWidth + padding > p.x;
-      const vertical   = y < p.y + imgHeight + padding && y + imgHeight + padding > p.y;
-      if (horizontal && vertical) {
-        overlap = true;
-        break;
+      for (const p of placed) {
+        const horizontal = x < p.x + imgWidth + padding && x + imgWidth + padding > p.x;
+        const vertical = y < p.y + imgHeight + padding && y + imgHeight + padding > p.y;
+        if (horizontal && vertical) {
+          overlap = true;
+          break;
+        }
       }
-    }
-    attempts++;
-  } while (overlap && attempts < 200);
+      attempts++;
+    } while (overlap && attempts < 200);
 
-  placed.push({ x, y });
+    placed.push({ x, y });
 
-  img.style.left = (x / viewW * 100) + '%';
-  img.style.top = (y / viewH * 100) + '%';
-  els.galleryView.appendChild(img);
+    img.style.left = (x / viewW * 100) + '%';
+    img.style.top = (y / viewH * 100) + '%';
+    els.galleryView.appendChild(img);
 
-  const label = document.createElement('div');
-  label.className = 'artist-label';
-  label.textContent = r[COL.name];
-  label.style.left = `calc(${x / viewW * 100}% + 4px)`;
-  label.style.top = `calc(${y / viewH * 100}% + ${imgHeight + 6}px)`;
-  els.galleryView.appendChild(label);
-});
+    const label = document.createElement('div');
+    label.className = 'artist-label';
+    label.textContent = r[COL.name];
+    label.style.left = `calc(${x / viewW * 100}% + 4px)`;
+    label.style.top = `calc(${y / viewH * 100}% + ${imgHeight + 6}px)`;
+    els.galleryView.appendChild(label);
+  });
+
+  // Button "Back to styles" funktioniert jetzt wieder
+  els.backBtn.onclick = () => {
+    els.galleryView.innerHTML = '';
+    els.styleTitle.textContent = '';
+    els.styleTitle.classList.add('hidden');
+    els.styleList.style.display = 'flex';
+    els.backBtn.style.display = 'none';
+  };
+}
+
 
   </script>
 </body>
