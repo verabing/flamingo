@@ -72,6 +72,12 @@
       background: var(--accent);
       color: #fff;
     }
+.floating-gallery {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 180px); /* nutzt den verfügbaren Platz unter dem Header */
+  overflow: hidden;
+}
 
     .floating-gallery img {
       position: absolute;
@@ -202,15 +208,17 @@
         const img = document.createElement('img');
         img.src = r[COL.photo];
         img.alt = r[COL.name];
-        img.style.left = Math.random()*80 + 10 + '%';
-        img.style.top = Math.random()*80 + 10 + '%';
+       const left = Math.random() * 80 + 10; // Prozent
+const top = Math.random() * 70 + 5;   // etwas weniger, damit nichts abgeschnitten wird
+img.style.left = left + '%';
+img.style.top = top + '%';
         els.galleryView.appendChild(img);
 
         const label = document.createElement('div');
         label.className = 'artist-label';
         label.textContent = r[COL.name];
-        label.style.left = `calc(${img.style.left} + 5px)`;
-        label.style.top = `calc(${img.style.top} + 110px)`;
+        label.style.left = `calc(${left}% + 5px)`;
+label.style.top = `calc(${top}% + 110px)`;
         els.galleryView.appendChild(label);
       });
     }
