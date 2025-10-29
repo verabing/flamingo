@@ -393,18 +393,31 @@
       window.onpopstate=()=>{if(location.search.startsWith('?artist=')){const n=new URLSearchParams(location.search).get('artist');showDetail(n,false)}else showList()}
     }
 
-  function render() {
+ function render() {
   const q = removeDiacritics(els.search.value.trim().toLowerCase());
   const fStyle = els.styleFilter.value;
   const fNation = els.nationFilter.value;
 
   const filtered = rows.filter(r => {
-    if (fStyle && r.style !== fStyle) return false;
+    // Mehrfach-Stil-Unterstützung:
+    if (fStyle) {
+      const styles = r.style.split(',').map(s => s.trim().toLowerCase());
+      if (!styles.includes(fStyle.toLowerCase())) return false;
+    }
+
     if (fNation && r.nation !== fNation) return false;
     if (favOnly && !isFav(r.fav)) return false;
     if (!q) return true;
 
-    const searchable = [r.name, r.style, r.nation, r.works, r.bio, r.quote, r.fav]
+    const searchable = [
+      r.name,
+      r.style,
+      r.nation,
+      r.works,
+      r.bio,
+      r.quote,
+      r.fav
+    ]
       .map(s => removeDiacritics(String(s).toLowerCase()))
       .join('|');
 
@@ -440,32 +453,93 @@
 
     card.appendChild(img);
     card.appendChild(meta);
-    card.onclick = () => { showDetail(r.name, true); };
+    card.onclick = () => {
+      showDetail(r.name, true);
+    };
+
     els.gallery.append(card);
   });
 }
 
 
-    function showDetail(name,push){
-      const r=byName.get(name);if(!r)return
-      els.gallery.classList.add('hidden');els.detail.style.display='block'
-      els.dName.textContent=r.name;els.dDates.textContent=r.dates
-      els.dStyle.textContent=r.style;els.dNation.textContent=r.nation
-      els.dFav.classList.toggle('hidden',!isFav(r.fav))
-      els.dBio.innerHTML=r.bio?`<h3>Kurzbiografie</h3><p>${r.bio}</p>`:''
-      els.dWorks.innerHTML=r.works?`<h3>Famous Works</h3><p>${r.works}</p>`:''
-      if(r.quote){els.dQuote.classList.remove('hidden');els.dQuoteText.textContent=r.quote}else els.dQuote.classList.add('hidden')
-      els.dWiki.href=r.wiki||'#';els.dImages.href = r.images || `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(r.name + " artworks")}`;
-els.dImages.classList.remove('hidden');
 
-els.dPhoto.src=r.photo
-      els.dStyle.onclick=()=>{els.styleFilter.value=r.style||'';showList();render()}
-      els.dNation.onclick=()=>{els.nationFilter.value=r.nation||'';showList();render()}
-      els.imageGallery.innerHTML=''
-     if(push) history.pushState({},'',`?artist=${encodeURIComponent(name)}`);
-// loadArtistImages(r.name); // deaktivert siden vi ikke bruker API
+    function showDetail(name, push) {
+  const r = byName.get(name);
+  if (!r) return;
 
-    }
+  // Ansicht wechseln
+  els.gallery.classList.add('hidden');
+  els.detail.style.display = 'block';
+
+  // Grunddaten
+  els.dName.textContent = r.name;
+  els.dDates.textContent = r.dates;
+
+  // ----- Mehrfach-Stile anzeigen -----
+  els.dStyle.innerHTML = ''; // alte Chips löschen
+  const styles = r.style.split(',').map(s => s.trim()).filter(Boolean);
+  styles.forEach(style => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = style;
+    chip.onclick = () => {
+      els.styleFilter.value = style;
+      showList();
+      render();
+    };
+    els.dStyle.appendChild(chip);
+  });
+
+  // ----- Nation als Chip -----
+  els.dNation.innerHTML = '';
+  if (r.nation) {
+    const nationChip = document.createElement('span');
+    nationChip.className = 'chip';
+    nationChip.textContent = r.nation;
+    nationChip.onclick = () => {
+      els.nationFilter.value = r.nation;
+      showList();
+      render();
+    };
+    els.dNation.appendChild(nationChip);
+  }
+
+  // ----- Favorit, Bio, Werke, Zitat -----
+  els.dFav.classList.toggle('hidden', !isFav(r.fav));
+  els.dBio.innerHTML = r.bio
+    ? `<h3>Kurzbiografie</h3><p>${r.bio}</p>`
+    : '';
+  els.dWorks.innerHTML = r.works
+    ? `<h3>Famous Works</h3><p>${r.works}</p>`
+    : '';
+  if (r.quote) {
+    els.dQuote.classList.remove('hidden');
+    els.dQuoteText.textContent = r.quote;
+  } else {
+    els.dQuote.classList.add('hidden');
+  }
+
+  // ----- Links -----
+  els.dWiki.href = r.wiki || '#';
+  els.dImages.href =
+    r.images ||
+    `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(
+      r.name + ' artworks'
+    )}`;
+  els.dImages.classList.remove('hidden');
+
+  // ----- Bild -----
+  els.dPhoto.src = r.photo;
+
+  // ----- Galerie leeren -----
+  els.imageGallery.innerHTML = '';
+
+  // URL-Parameter setzen (Back-Button-Historie)
+  if (push) history.pushState({}, '', `?artist=${encodeURIComponent(name)}`);
+
+  // loadArtistImages(r.name); // deaktiviert, kein API-Call
+}
+
 
     async function loadArtistImages(name){
       try{
