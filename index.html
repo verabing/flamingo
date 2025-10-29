@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Flamingo meets artist</title>
 
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+  <title>Flamingo meets artist</title>
+
   <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
-    :root {
+    :root{
       --accent:#db3553;
       --accent-weak:#fbe3e7;
       --bg:#fff;
@@ -21,248 +23,340 @@
       --radius:14px;
     }
     *{box-sizing:border-box}
-    body {
-      margin:0;
-      font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif;
-      color:var(--text);
-      background:var(--bg);
-    }
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif;color:var(--text);background:var(--bg)}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
 
-    header {
-      position:sticky;
-      top:0;
-      background:var(--accent);
-      color:#fff;
-      text-align:center;
-      padding:16px 8px;
-      z-index:10;
-      box-shadow:0 2px 6px rgba(0,0,0,.1);
-    }
-    header h1 {
-      margin:0;
-      font-size:24px;
-      font-weight:800;
-    }
-    header p {
-      margin:6px auto 12px;
-      max-width:800px;
-      font-size:13px;
-      color:#fce8eb;
-    }
+    /* Header */
+    header{position:sticky;top:0;z-index:10;background:var(--accent);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+    .wrap{max-width:1200px;margin:0 auto;padding:18px}
+    .title{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:800;font-size:24px;cursor:pointer}
+    .flamingo-dot{width:12px;height:12px;border-radius:50%;background:#fff}
 
-    .controls {
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:center;
-      gap:8px;
-      margin-bottom:10px;
-    }
-    .controls select,
-    .controls input {
-      height:34px;
-      font-size:14px;
-      border-radius:8px;
-      border:1px solid #ddd;
-      padding:0 10px;
-    }
-    .controls input { width:220px; }
-    .controls a {
-      display:inline-block;
-      padding:8px 14px;
-      border-radius:8px;
-      background:#fff0f3;
-      color:var(--accent);
-      font-weight:600;
-      border:1px solid var(--accent);
-      transition:.2s;
-      text-decoration:none;
-    }
-    .controls a:hover { background:var(--accent); color:#fff; }
+    /* Controls */
+    .controls{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.5rem;margin-top:10px;padding:0 1rem}
+    .controls select,.controls input{height:34px;font-size:.9rem;border-radius:8px;border:1px solid #ddd;padding:0 10px;width:160px}
+    .controls input{width:220px}
+    .fav-toggle{height:34px;width:40px;border-radius:8px;border:1px solid var(--accent);background:#fff0f3;color:var(--accent);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:background .2s}
+    .fav-toggle:hover{background:var(--accent);color:#fff}
+    .fav-toggle.active{box-shadow:0 0 0 2px #fff inset}
 
-    main {
-      max-width:1200px;
-      margin:0 auto;
-      padding:20px;
-    }
+    .controls a{padding:8px 14px;border-radius:8px;background:#fff0f3;color:var(--accent);font-weight:600;border:1px solid var(--accent);transition:background .2s}
+    .controls a:hover{background:var(--accent);color:#fff;text-decoration:none}
 
-    .grid {
-      display:grid;
-      gap:20px;
-      grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-    }
+    /* Main Grid */
+    main{max-width:1200px;margin:0 auto;padding:18px}
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+    .card{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;background:#fff;transition:transform .2s, box-shadow .2s}
+    .card:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,.1)}
+    .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;background:#f6f6f6;opacity:0;transition:opacity .4s ease-in}
+    .thumb.loaded{opacity:1}
+    .meta{padding:10px 12px}
+    .name{font-weight:700;margin:2px 0 6px;font-size:14px}
+    .sub{color:var(--muted);font-size:12px}
+    .dates{color:#db3553;font-size:12px;font-weight:600;margin-bottom:2px}
+    .badge{font-size:11px;color:var(--accent)}
 
-    .artist-card {
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      overflow:hidden;
-      background:#fff;
-      box-shadow:var(--shadow);
-      transition:transform .2s ease, box-shadow .2s ease;
-      cursor:pointer;
-    }
-    .artist-card:hover {
-      transform:translateY(-4px);
-      box-shadow:0 8px 20px rgba(0,0,0,.1);
-    }
-    .artist-card img {
-      width:100%;
-      height:200px;
-      object-fit:cover;
-      display:block;
-    }
-    .artist-info { padding:10px 14px; text-align:center; }
-    .artist-info h3 {
-      margin:0 0 6px;
-      font-size:16px;
-      font-weight:700;
-    }
-    .artist-info p {
-      margin:0;
-      font-size:13px;
-      color:var(--muted);
-    }
+    /* Detailansicht */
+    .detail{max-width:900px;margin:0 auto;display:none}
+    .back{margin:6px 0 16px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer}
+    .detail-head{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+    @media(max-width:880px){.detail-head{grid-template-columns:1fr}}
+    .detail-title{margin:0;font-size:28px;font-weight:900}
+    .detail-sub{color:var(--muted);margin:8px 0 14px}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+    .chip{font-size:12px;border:1px solid var(--border);padding:5px 10px;border-radius:999px;background:#fff;cursor:pointer}
+    .chip:hover{border-color:var(--accent);color:var(--accent)}
+    .detail-img{width:100%;border-radius:12px;border:1px solid var(--border);background:#f6f6f6;object-fit:cover;max-height:520px}
+    .detail-section{margin:18px 0}
+    .quote{border-left:4px solid var(--accent);padding:10px 12px;background:#fff;border-radius:8px;font-style:italic}
+    .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+    .btn{padding:9px 12px;border-radius:10px;border:1px solid var(--accent);color:var(--accent);background:#fff;font-weight:600}
+    .image-gallery{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .image-gallery img{width:120px;height:120px;object-fit:cover;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+    .hidden{display:none!important}
 
-    footer {
-      text-align:center;
-      font-size:12px;
-      color:#777;
-      margin:40px auto 20px;
-      max-width:700px;
-      line-height:1.6;
-      border-top:1px solid #eee;
-      padding-top:10px;
-    }
-
-    @media(max-width:768px){
-      header h1{font-size:20px;}
-      .grid{grid-template-columns:repeat(2,1fr);gap:12px;}
-      .artist-card img{height:160px;}
-      .artist-info h3{font-size:14px;}
-      .artist-info p{font-size:12px;}
+    /* Mobile */
+    @media (max-width: 768px) {
+      header{padding:8px 0}
+      .wrap{padding:10px}
+      .title{font-size:18px;margin-bottom:4px}
+      header p{display:none}
+      .controls{gap:6px}
+      .controls select,.controls input,.fav-toggle{height:34px;width:48%;font-size:13px}
+      .fav-toggle{width:34px;min-width:34px;padding:0;font-size:16px}
+      main{padding:10px}
+      .grid{grid-template-columns:repeat(2, 1fr);gap:10px}
+      .card{border-radius:10px;box-shadow:none}
+      .thumb{max-height:180px}
+      .meta{padding:6px}
+      .name{font-size:14px}
+      .sub{font-size:11px}
+      .detail-title{font-size:22px}
+      .detail-img{max-height:300px}
+      .detail-sub{font-size:13px}
+      .btn{padding:6px 10px;font-size:13px}
+      .image-gallery img{width:90px;height:90px}
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>• Flamingo meets artist</h1>
-    <p>
-      A personal, non-commercial AI art project – all flamingo images were generated by AI,
-      inspired by the styles of various artists. A poetic homage, not original works.
-    </p>
-    <div class="controls">
-      <select id="styleFilter"><option value="">Art Style (alle)</option></select>
-      <select id="nationFilter"><option value="">Nationality (alle)</option></select>
-      <input id="searchInput" type="search" placeholder="Search: name, style, nationality…" />
-      <a href="styles.html">🦩 Explore by style</a>
+    <div class="wrap">
+      <div class="title" id="homeLink">
+        <span class="flamingo-dot"></span>Flamingo meets artist
+      </div>
+      <p style="text-align:center;font-size:13px;color:#fce8eb;margin:6px 0 14px;max-width:800px;margin-left:auto;margin-right:auto;">
+        <em>
+          A personal, non-commercial online AI art project: All flamingo images were generated by AI – inspired by the styles of the respective artists.
+          They are a poetic homage, not original works. Following the playful poetic idea: “If XX had painted a flamingo, what might it look like?”
+        </em>
+      </p>
+      <div class="controls">
+        <select id="styleFilter"><option value="">Art Style (alle)</option></select>
+        <select id="nationFilter"><option value="">Nationality (alle)</option></select>
+        <input id="searchInput" type="search" placeholder="Search: name, style, nationality …" />
+        <button id="favToggle" class="fav-toggle" type="button" title="Nur Lieblinge">💖</button>
+        <a href="styles.html">🦩 Explore by style</a>
+      </div>
     </div>
   </header>
 
   <main>
     <section id="gallery" class="grid"></section>
+
+    <section id="detail" class="detail">
+      <button class="back" id="backBtn">← Zurück</button>
+      <div class="detail-head">
+        <div>
+          <h1 id="dName" class="detail-title"></h1>
+          <div id="dDates" class="detail-sub"></div>
+          <div class="chips" id="chipRow"></div>
+          <div id="dBio" class="detail-section"></div>
+          <div id="dWorks" class="detail-section"></div>
+          <div id="dQuote" class="detail-section hidden"><div class="quote" id="dQuoteText"></div></div>
+          <div class="links">
+            <a id="dWiki" class="btn" target="_blank" rel="noopener">Wikipedia</a>
+            <a id="dImages" class="btn" target="_blank" rel="noopener">Artworks</a>
+          </div>
+          <div id="imageGallery" class="image-gallery"></div>
+        </div>
+        <div><img id="dPhoto" class="detail-img" alt="Artist photo" /></div>
+      </div>
+    </section>
   </main>
 
-  <footer>
-    <p><strong>Disclaimer:</strong> This project is non-commercial and serves artistic and visual exploration.
-    All flamingo images were generated by AI, inspired by the styles of various artists.
-    They are free interpretations, not reproductions of existing works.</p>
-    <p>The referenced artists, data, and artwork citations come from public sources
-    (Wikipedia, Google Images, museums, art archives).
-    All rights to the original works remain with their respective rights holders.</p>
-    <p>© 2025 – Flamingo meets artist · A personal project of lived art appreciation by Frau Ke</p>
-  </footer>
-
   <script>
-  const SHEET_CSV_URL =
-    "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
+    // --- Sheet & Spalten ---
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
+    const COL = {
+      style:'Art style',photo:'Photo',name:'artist',dates:'born - death',nation:'Nationality',
+      works:'Famous Work',bio:'Short biography',quote:'Known "Quote" or "quirk"',fav:'Lieblinge',
+      wiki:'Wikipedia search',images:'Images search'
+    };
 
-  const els = {
-    container: document.getElementById("gallery"),
-    search: document.getElementById("searchInput"),
-    styleFilter: document.getElementById("styleFilter"),
-    nationFilter: document.getElementById("nationFilter")
-  };
+    // --- DOM ---
+    const els = {
+      gallery:document.getElementById('gallery'),
+      detail:document.getElementById('detail'),
+      backBtn:document.getElementById('backBtn'),
+      styleFilter:document.getElementById('styleFilter'),
+      nationFilter:document.getElementById('nationFilter'),
+      search:document.getElementById('searchInput'),
+      favToggle:document.getElementById('favToggle'),
+      homeLink:document.getElementById('homeLink'),
+      dName:document.getElementById('dName'),
+      dDates:document.getElementById('dDates'),
+      chipRow:document.getElementById('chipRow'),
+      dBio:document.getElementById('dBio'),
+      dWorks:document.getElementById('dWorks'),
+      dQuote:document.getElementById('dQuote'),
+      dQuoteText:document.getElementById('dQuoteText'),
+      dWiki:document.getElementById('dWiki'),
+      dImages:document.getElementById('dImages'),
+      dPhoto:document.getElementById('dPhoto'),
+      imageGallery:document.getElementById('imageGallery')
+    };
 
-  let rows = [];
-
-  Papa.parse(SHEET_CSV_URL, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: res => {
-      rows = res.data.filter(r => r.artist);
-      initFilters();
-      render();
-    },
-    error: err => {
-      console.error("❌ Fehler beim Laden des CSV:", err);
+    // --- Utils ---
+    function removeDiacritics(s){
+      try { return s ? s.normalize('NFD').replace(/\p{Diacritic}/gu,'') : '' } catch(e){ return s||'' }
     }
-  });
+    function isFav(v){return v && String(v).trim().length>0}
+    function uniqSorted(l){return Array.from(new Set(l.filter(Boolean).map(s=>String(s).trim()))).sort()}
+    function field(r,k){return r?.[k]??''}
 
-  function uniqSorted(list) {
-    return [...new Set(list.filter(Boolean).map(s => s.trim()))].sort();
-  }
+    // --- State ---
+    let rows=[],byName=new Map(),favOnly=false;
 
-  function initFilters() {
-    const styles = uniqSorted(
-      rows.flatMap(r => String(r["Art style"] || "").split(",").map(s => s.trim()))
-    );
-    const nations = uniqSorted(rows.map(r => r.nationality));
+    // --- Load ---
+    Papa.parse(SHEET_CSV_URL,{
+      download:true,header:true,skipEmptyLines:true,
+      complete:(res)=>{
+        rows=res.data.map(r=>({
+          style:field(r,COL.style),photo:field(r,COL.photo),name:field(r,COL.name),
+          dates:field(r,COL.dates),nation:field(r,COL.nation),works:field(r,COL.works),
+          bio:field(r,COL.bio),quote:field(r,COL.quote),fav:field(r,COL.fav),
+          wiki:field(r,COL.wiki),images:field(r,COL.images)
+        })).filter(r=>r.name)
+        rows.forEach(r=>byName.set(r.name,r))
+        initFilters();
+        applyRouteFromURL();
+      },
+      error:(e)=>console.error("CSV load error",e)
+    })
 
-    els.styleFilter.innerHTML = '<option value="">Art Style (alle)</option>';
-    els.nationFilter.innerHTML = '<option value="">Nationality (alle)</option>';
+    // --- Filters init ---
+    function initFilters(){
+      const styles=uniqSorted(rows.flatMap(r=>String(r.style||'').split(',').map(s=>s.trim()).filter(Boolean)))
+      const nations=uniqSorted(rows.map(r=>r.nation))
+      els.styleFilter.innerHTML='<option value="">Art Style (alle)</option>'
+      els.nationFilter.innerHTML='<option value="">Nationality (alle)</option>'
+      styles.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;els.styleFilter.appendChild(o)})
+      nations.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;els.nationFilter.appendChild(o)})
 
-    styles.forEach(s => {
-      const o = document.createElement("option");
-      o.value = s;
-      o.textContent = s;
-      els.styleFilter.appendChild(o);
-    });
+      els.styleFilter.onchange=()=>{pushRoute({style:els.styleFilter.value||null});showList();render()}
+      els.nationFilter.onchange=()=>{pushRoute({nation:els.nationFilter.value||null});showList();render()}
 
-    nations.forEach(n => {
-      const o = document.createElement("option");
-      o.value = n;
-      o.textContent = n;
-      els.nationFilter.appendChild(o);
-    });
+      els.search.oninput=render
+      els.search.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); render(); } })
 
-    els.styleFilter.onchange = render;
-    els.nationFilter.onchange = render;
-    els.search.oninput = render;
-  }
+      els.favToggle.onclick=()=>{favOnly=!favOnly;els.favToggle.classList.toggle('active',favOnly);render()}
 
-  function render() {
-    const fStyle = els.styleFilter.value.trim().toLowerCase();
-    const fNation = els.nationFilter.value.trim().toLowerCase();
-    const term = els.search.value.trim().toLowerCase();
+      els.backBtn.onclick=()=>{history.back()}
 
-    const filtered = rows.filter(r => {
-      const styles = String(r["Art style"] || "")
-        .split(",")
-        .map(s => s.trim().toLowerCase());
+      els.homeLink.onclick=()=>{ // ALLES resetten
+        els.styleFilter.value=''; els.nationFilter.value=''; els.search.value=''; favOnly=false; els.favToggle.classList.remove('active');
+        showList(); render(); pushRoute({}); // root
+      }
 
-      if (fStyle && !styles.includes(fStyle)) return false;
-      if (fNation && String(r.nationality || "").trim().toLowerCase() !== fNation)
-        return false;
+      window.onpopstate=applyRouteFromURL;
+    }
 
-      const txt = `${r.artist} ${r["Art style"]} ${r.nationality}`.toLowerCase();
-      return !term || txt.includes(term);
-    });
+    // --- Routing (URL <-> UI) ---
+    function pushRoute({artist=null,style=null,nation=null}){
+      const params=new URLSearchParams()
+      if(artist) params.set('artist',artist)
+      if(style)  params.set('style',style)
+      if(nation) params.set('nation',nation)
+      const q=params.toString()
+      history.pushState({},'', q ? ('?'+q) : location.pathname)
+    }
 
-    els.container.innerHTML = "";
-    filtered.forEach(r => {
-      const card = document.createElement("div");
-      card.className = "artist-card";
-      card.innerHTML = `
-        <img src="${r.Photo}" alt="${r.artist}">
-        <div class="artist-info">
-          <h3>${r.artist}</h3>
-          <p>${r["Art style"] || ""}</p>
-        </div>`;
-      els.container.appendChild(card);
-    });
-  }
+    function applyRouteFromURL(){
+      const q=new URLSearchParams(location.search)
+      const artist=q.get('artist'), style=q.get('style'), nation=q.get('nation')
+
+      // reset UI baseline
+      els.styleFilter.value=style||''
+      els.nationFilter.value=nation||''
+      if(artist){
+        showDetail(artist,false)
+      }else{
+        showList()
+        render()
+      }
+    }
+
+    // --- Render Grid ---
+    function render(){
+      const qRaw=els.search.value.trim().toLowerCase()
+      const q=removeDiacritics(qRaw)
+      const fStyle=els.styleFilter.value
+      const fNation=els.nationFilter.value
+
+      const filtered=rows.filter(r=>{
+        if(fStyle){
+          const styles=String(r.style||'').split(',').map(s=>s.trim())
+          if(!styles.includes(fStyle)) return false
+        }
+        if(fNation && r.nation!==fNation) return false
+        if(favOnly && !isFav(r.fav)) return false
+        if(!q) return true
+        const hay = removeDiacritics([r.name,r.style,r.nation,r.works,r.bio,r.quote,r.fav].join('|').toLowerCase())
+        return hay.includes(q)
+      })
+
+      els.gallery.innerHTML=''
+      filtered.forEach(r=>{
+        const card = document.createElement('article')
+        card.className = 'card'
+
+        const img = document.createElement('img')
+        img.className = 'thumb'
+        img.loading = 'lazy'
+        img.src = r.photo
+        img.alt = r.name
+        img.onload = () => img.classList.add('loaded')
+
+        const meta = document.createElement('div')
+        meta.className = 'meta'
+        meta.innerHTML = `
+          <div class="dates">${r.dates||''}</div>
+          <div class="name">${r.name}</div>
+          <div class="sub">${r.style||''} ${isFav(r.fav)?'💖':''}</div>
+        `;
+
+        card.appendChild(img)
+        card.appendChild(meta)
+        card.onclick = () => { showDetail(r.name,true) }
+
+        els.gallery.append(card)
+      })
+    }
+
+    // --- Detail ---
+    function showDetail(name,push){
+      const r=byName.get(name); if(!r) return
+      els.gallery.classList.add('hidden'); els.detail.style.display='block'
+      els.dName.textContent=r.name; els.dDates.textContent=r.dates
+
+      // Chips neu aufbauen (Styles können mehrere sein)
+      els.chipRow.innerHTML=''
+      const styleParts=String(r.style||'').split(',').map(s=>s.trim()).filter(Boolean)
+      styleParts.forEach(st=>{
+        const chip=document.createElement('span')
+        chip.className='chip'
+        chip.textContent=st
+        chip.onclick=()=>{ els.styleFilter.value=st; showList(); render(); pushRoute({style:st}) }
+        els.chipRow.appendChild(chip)
+      })
+      const nationChip=document.createElement('span')
+      nationChip.className='chip'
+      nationChip.textContent=r.nation||''
+      nationChip.onclick=()=>{ if(r.nation){ els.nationFilter.value=r.nation; showList(); render(); pushRoute({nation:r.nation}) } }
+      els.chipRow.appendChild(nationChip)
+
+      els.dBio.innerHTML=r.bio?`<h3>Kurzbiografie</h3><p>${r.bio}</p>`:''
+      els.dWorks.innerHTML=r.works?`<h3>Famous Works</h3><p>${r.works}</p>`:''
+      if(r.quote){els.dQuote.classList.remove('hidden');els.dQuoteText.textContent=r.quote}else els.dQuote.classList.add('hidden')
+
+      els.dWiki.href=r.wiki||'#'
+      els.dWiki.style.display = r.wiki ? 'inline-block' : 'none'
+      els.dImages.href = r.images || `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(r.name + " artworks")}`
+      els.dImages.style.display = 'inline-block'
+
+      els.dPhoto.src=r.photo
+
+      els.backBtn.onclick=()=>history.back()
+
+      if(push) pushRoute({artist:name})
+    }
+
+    function showList(){
+      els.detail.style.display='none'
+      els.gallery.classList.remove('hidden')
+    }
   </script>
+
+  <footer style="margin:50px auto 20px;text-align:center;font-size:12px;color:#777;max-width:720px;padding:20px 10px;border-top:1px solid #eee;line-height:1.6;">
+    <p><strong>Disclaimer:</strong> This project is non-commercial and serves artistic and visual exploration.
+      All flamingo images were generated by AI, inspired by the styles of various artists. They are free interpretations, not reproductions of existing works.</p>
+    <p>The referenced artists, data, and artwork citations come from public sources (Wikipedia, Google Images, museums, art archives).
+      All rights to the original works remain with their respective rights holders.</p>
+    <p style="margin-top:8px;">© 2025 – Flamingo meets artist · A personal project of lived art appreciation by Frau Ke</p>
+  </footer>
 
 </body>
 </html>
