@@ -304,284 +304,105 @@
   </main>
 
   <script>
-    // --- Dein Google Sheet ---
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
+const els = {
+  container: document.getElementById("artistList"),
+  search: document.getElementById("search"),
+  styleFilter: document.getElementById("styleFilter"),
+  nationFilter: document.getElementById("nationFilter"),
+};
 
-    // --- Hier deine Google API-Daten eintragen ---
-    const GOOGLE_API_KEY = ""; // <-- dein API-Key hier
-    const GOOGLE_CX = "4670d1e4605354551";      // <-- deine Search Engine ID (CX) hier
+let rows = [];
 
-    const COL = {
-      style:'Art style',photo:'Photo',name:'artist',dates:'born - death',nation:'Nationality',
-      works:'Famous Work',bio:'Short biography',quote:'Known "Quote" or "quirk"',fav:'Lieblinge',
-      wiki:'Wikipedia search',images:'Images search'
-
-    };
-
-    let rows=[],byName=new Map(),favOnly=false;
-    const els={
-      gallery:document.getElementById('gallery'),
-      detail:document.getElementById('detail'),
-      backBtn:document.getElementById('backBtn'),
-      styleFilter:document.getElementById('styleFilter'),
-      nationFilter:document.getElementById('nationFilter'),
-      search:document.getElementById('searchInput'),
-      favToggle:document.getElementById('favToggle'),
-      homeLink:document.getElementById('homeLink'),
-      dName:document.getElementById('dName'),
-      dDates:document.getElementById('dDates'),
-      dStyle:document.getElementById('dStyle'),
-      dNation:document.getElementById('dNation'),
-      dFav:document.getElementById('dFav'),
-      dBio:document.getElementById('dBio'),
-      dWorks:document.getElementById('dWorks'),
-      dQuote:document.getElementById('dQuote'),
-      dQuoteText:document.getElementById('dQuoteText'),
-      dWiki:document.getElementById('dWiki'),
-      dImages:document.getElementById('dImages'),
-      dPhoto:document.getElementById('dPhoto'),
-      imageGallery:document.getElementById('imageGallery')
-    };
-
-    function isFav(v){return v&&String(v).trim().length>0}
-    function uniqSorted(l){return Array.from(new Set(l.filter(Boolean).map(s=>String(s).trim()))).sort()}
-    function field(r,k){return r?.[k]??''}
-    function removeDiacritics(str) {
-  return str ? str.normalize('NFD').replace(/\p{Diacritic}/gu, "") : "";
-}
-
-    Papa.parse(SHEET_CSV_URL,{
-      download:true,header:true,skipEmptyLines:true,
-      complete:(res)=>{
-        rows=res.data.map(r=>({
-  style:field(r,COL.style),photo:field(r,COL.photo),name:field(r,COL.name),
-  dates:field(r,COL.dates),nation:field(r,COL.nation),works:field(r,COL.works),
-  bio:field(r,COL.bio),quote:field(r,COL.quote),fav:field(r,COL.fav),
-  wiki:field(r,COL.wiki),images:field(r,COL.images)
-})).filter(r=>r.name)
-        rows.forEach(r=>byName.set(r.name,r))
-        initFilters();render()
-      }
-    })
-
-    function initFilters(){
-        // Styles und Nationen einlesen
-  const styles = uniqSorted(
-    rows.flatMap(r => String(r.style || '')
-      .split(',')
-      .map(s => s.trim()))
-  );
-      const nations=uniqSorted(rows.map(r=>r.nation))
-      styles.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;els.styleFilter.appendChild(o)})
-      nations.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;els.nationFilter.appendChild(o)})
-      els.styleFilter.onchange=render;els.nationFilter.onchange=render
-      els.search.oninput=render
-      els.search.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
+Papa.parse(SHEET_CSV_URL, {
+  download: true,
+  header: true,
+  skipEmptyLines: true,
+  complete: res => {
+    rows = res.data.filter(r => r.artist);
+    initFilters();
     render();
   }
 });
 
-      els.favToggle.onclick=()=>{favOnly=!favOnly;els.favToggle.classList.toggle('active',favOnly);render()}
-      els.backBtn.onclick=()=>{showList();history.pushState({},'',location.pathname)}
-      els.homeLink.onclick=()=>{
-  els.styleFilter.value = '';
-  els.nationFilter.value = '';
-  els.search.value = '';
-  favOnly = false;
-  els.favToggle.classList.remove('active');
-  showList();
-  render();
-  history.pushState({},'',location.pathname);
+function uniqSorted(list) {
+  return [...new Set(list.filter(Boolean).map(s => s.trim()))].sort();
 }
-     window.onpopstate = () => {
-  const params = new URLSearchParams(location.search);
-  const artist = params.get('artist');
-  const style = params.get('style');
-  const nation = params.get('nation');
 
-  if (artist) {
-    showDetail(decodeURIComponent(artist), false);
-  } else if (style) {
-    els.styleFilter.value = style;
-    showList();
-    render();
-  } else if (nation) {
-    els.nationFilter.value = nation;
-    showList();
-    render();
-  } else {
-    els.styleFilter.value = '';
-    els.nationFilter.value = '';
-    showList();
-    render();
-  }
-};
+function initFilters() {
+  const styles = uniqSorted(
+    rows.flatMap(r => String(r["Art style"] || "").split(",").map(s => s.trim()))
+  );
+  const nations = uniqSorted(rows.map(r => r.nationality));
 
+  els.styleFilter.innerHTML = '<option value="">Art Style (alle)</option>';
+  els.nationFilter.innerHTML = '<option value="">Nationality (alle)</option>';
 
- function render() {
-  const q = removeDiacritics(els.search.value.trim().toLowerCase());
-  const fStyle = els.styleFilter.value;
-  const fNation = els.nationFilter.value;
+  styles.forEach(s => {
+    const o = document.createElement("option");
+    o.value = s;
+    o.textContent = s;
+    els.styleFilter.appendChild(o);
+  });
+
+  nations.forEach(n => {
+    const o = document.createElement("option");
+    o.value = n;
+    o.textContent = n;
+    els.nationFilter.appendChild(o);
+  });
+
+  els.styleFilter.onchange = render;
+  els.nationFilter.onchange = render;
+  els.search.oninput = render;
+  els.search.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      render();
+    }
+  });
+}
+
+function render() {
+  const fStyle = els.styleFilter.value.trim().toLowerCase();
+  const fNation = els.nationFilter.value.trim().toLowerCase();
+  const term = els.search.value.trim().toLowerCase();
 
   const filtered = rows.filter(r => {
-    // Mehrfach-Stil-Unterstützung:
-   if (fStyle) {
-  const styles = r.style.split(',').map(s => s.trim().toLowerCase());
-  if (!styles.includes(fStyle.toLowerCase())) return false;
-}
+    const styles = String(r["Art style"] || "")
+      .split(",")
+      .map(s => s.trim().toLowerCase());
 
+    if (fStyle && !styles.includes(fStyle)) return false;
+    if (fNation && String(r.nationality || "").trim().toLowerCase() !== fNation)
+      return false;
 
-    if (fNation && r.nation !== fNation) return false;
-    if (favOnly && !isFav(r.fav)) return false;
-    if (!q) return true;
-
-    const searchable = [
-      r.name,
-      r.style,
-      r.nation,
-      r.works,
-      r.bio,
-      r.quote,
-      r.fav
-    ]
-      .map(s => removeDiacritics(String(s).toLowerCase()))
-      .join('|');
-
-    return searchable.includes(q);
+    const txt = `${r.artist} ${r["Art style"]} ${r.nationality}`.toLowerCase();
+    return !term || txt.includes(term);
   });
 
-  els.gallery.innerHTML = '';
-
+  els.container.innerHTML = "";
   filtered.forEach(r => {
-    const card = document.createElement('article');
-    card.className = 'card';
+    const card = document.createElement("div");
+    card.className = "artist-card";
 
-    const img = document.createElement('img');
-    img.className = 'thumb';
-    img.loading = 'lazy';
-    img.src = r.photo;
-    img.alt = r.name;
-    img.onload = () => img.classList.add('loaded');
-
-    const meta = document.createElement('div');
-    meta.className = 'meta';
-    meta.innerHTML = `
-      <div class="dates" style="color:#db3553;font-size:12px;font-weight:600;margin-bottom:2px;">
-        ${r.dates || ''}
-      </div>
-      <div class="name" style="font-weight:700;font-size:14px;color:#222;margin-bottom:4px;">
-        ${r.name}
-      </div>
-      <div class="sub" style="color:#666;font-size:13px;">
-        ${r.style || ''} ${isFav(r.fav) ? '💖' : ''}
+    card.innerHTML = `
+      <img src="${r.Photo}" alt="${r.artist}">
+      <div class="artist-info">
+        <h3>${r.artist}</h3>
+        <p>${r["Art style"] || ""}</p>
       </div>
     `;
-
-    card.appendChild(img);
-    card.appendChild(meta);
     card.onclick = () => {
-      showDetail(r.name, true);
+      const url = `artist.html?artist=${encodeURIComponent(r.artist)}`;
+      window.location.href = url;
     };
 
-    els.gallery.append(card);
+    els.container.appendChild(card);
   });
 }
+</script>
 
-
-
-    function showDetail(name, push) {
-  const r = byName.get(name);
-  if (!r) return;
-
-  // Ansicht wechseln
-  els.gallery.classList.add('hidden');
-  els.detail.style.display = 'block';
-
-  // Grunddaten
-  els.dName.textContent = r.name;
-  els.dDates.textContent = r.dates;
-
-  // ----- Mehrfach-Stile anzeigen -----
-  els.dStyle.innerHTML = ''; // alte Chips löschen
-  const styles = r.style.split(',').map(s => s.trim()).filter(Boolean);
-  styles.forEach(style => {
-    const chip = document.createElement('span');
-    chip.className = 'chip';
-    chip.textContent = style;
-    chip.onclick = () => {
-      els.styleFilter.value = style;
-      showList();
-      render();
-    };
-    els.dStyle.appendChild(chip);
-  });
-
-  // ----- Nation als Chip -----
-  els.dNation.innerHTML = '';
-  if (r.nation) {
-    const nationChip = document.createElement('span');
-    nationChip.className = 'chip';
-    nationChip.textContent = r.nation;
-    nationChip.onclick = () => {
-      els.nationFilter.value = r.nation;
-      showList();
-      render();
-    };
-    els.dNation.appendChild(nationChip);
-  }
-
-  // ----- Favorit, Bio, Werke, Zitat -----
-  els.dFav.classList.toggle('hidden', !isFav(r.fav));
-  els.dBio.innerHTML = r.bio
-    ? `<h3>Kurzbiografie</h3><p>${r.bio}</p>`
-    : '';
-  els.dWorks.innerHTML = r.works
-    ? `<h3>Famous Works</h3><p>${r.works}</p>`
-    : '';
-  if (r.quote) {
-    els.dQuote.classList.remove('hidden');
-    els.dQuoteText.textContent = r.quote;
-  } else {
-    els.dQuote.classList.add('hidden');
-  }
-
-  // ----- Links -----
-  els.dWiki.href = r.wiki || '#';
-  els.dImages.href =
-    r.images ||
-    `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(
-      r.name + ' artworks'
-    )}`;
-  els.dImages.classList.remove('hidden');
-
-  // ----- Bild -----
-  els.dPhoto.src = r.photo;
-
-  // ----- Galerie leeren -----
-  els.imageGallery.innerHTML = '';
-
-  // URL-Parameter setzen (Back-Button-Historie)
-  if (push) history.pushState({}, '', `?artist=${encodeURIComponent(name)}`);
-
-  // loadArtistImages(r.name); // deaktiviert, kein API-Call
-}
-
-
-    async function loadArtistImages(name){
-      try{
-       const q = encodeURIComponent(`${name} artist painting OR artwork OR art OR canvas OR gallery OR museum`)
-        const url = `https://www.googleapis.com/customsearch/v1?q=${q}&cx=${GOOGLE_CX}&key=${GOOGLE_API_KEY}&searchType=image&num=10&imgType=photo&imgSize=medium&safe=off`
-        const res=await fetch(url)
-        const data=await res.json()
-        const imgs=data.items?.map(i=>`<img src="${i.link}" alt="${i.title}">`).join('')||''
-        els.imageGallery.innerHTML=imgs
-      }catch(e){console.error("Image load error",e)}
-    }
-
-    function showList(){els.detail.style.display='none';els.gallery.classList.remove('hidden')}
-  </script>
 <footer style="margin:50px auto 20px;text-align:center;font-size:12px;color:#777;max-width:720px;padding:20px 10px;border-top:1px solid #eee;line-height:1.6;">
   <p><strong>Disclaimer:</strong> This project is non-commercial and serves artistic and visual exploration. 
     All flamingo images were generated by AI, inspired by the styles of various artists. They are free interpretations, not reproductions of existing works.</p>
