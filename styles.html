@@ -258,25 +258,24 @@
   }
 
   // 🔥 Styles korrekt aufsplitten, trimmen und vereinheitlichen
-  function initStyles() {
-    const styles = uniqSorted(
-      rows.flatMap(r =>
-        String(r[COL.style] || "")
-          .split(",")
-          .map(s => s.trim())
-          .filter(Boolean)
-      )
-    );
+function initStyles() {
+  const allStyles = rows.flatMap(r =>
+    String(r[COL.style] || "")
+      .split(",")
+      .map(s => s.trim())
+  );
+  const styles = Array.from(new Set(allStyles)).sort();
 
-    els.styleList.innerHTML = "";
-    styles.forEach(s => {
-      const btn = document.createElement("button");
-      btn.className = "style-btn";
-      btn.textContent = s;
-      btn.onclick = () => showStyle(s);
-      els.styleList.appendChild(btn);
-    });
-  }
+  els.styleList.innerHTML = "";
+  styles.forEach(s => {
+    const btn = document.createElement("button");
+    btn.className = "style-btn";
+    btn.textContent = s;
+    btn.onclick = () => showStyle(s);
+    els.styleList.appendChild(btn);
+  });
+}
+
 
   function showStyle(styleName) {
     els.styleList.style.display = "none";
