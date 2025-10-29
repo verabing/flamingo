@@ -320,9 +320,17 @@ Papa.parse(SHEET_CSV_URL, {
   header: true,
   skipEmptyLines: true,
   complete: res => {
+    console.log("✅ CSV geladen, Zeilen:", res.data.length);
+    console.log("🔍 Erste Zeile:", res.data[0]);
+
     rows = res.data.filter(r => r.artist);
+    console.log("🎨 Gefilterte Künstler:", rows.length);
+
     initFilters();
     render();
+  },
+  error: err => {
+    console.error("❌ Fehler beim Laden des CSV:", err);
   }
 });
 
