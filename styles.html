@@ -6,9 +6,8 @@
   <title>Flamingo by Style</title>
 
   <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="favicon.ico">
-  
+
   <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
@@ -23,11 +22,12 @@
       --radius:14px;
     }
 
-    *{box-sizing:border-box;margin:0;padding:0}
+    * { box-sizing:border-box; margin:0; padding:0; }
+
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: system-ui,Segoe UI,Roboto,Inter,sans-serif;
+      font-family: system-ui, Segoe UI, Roboto, Inter, sans-serif;
       min-height: 100vh;
     }
 
@@ -49,7 +49,6 @@
       left: 10px;
       display: flex;
       gap: 10px;
-      flex-wrap: wrap;
       z-index: 30;
     }
 
@@ -60,20 +59,12 @@
       background: transparent;
       color: #fff;
       font-weight: 600;
-      text-decoration: none;
-      transition: background .2s, color .2s, transform .2s;
-    }
-
-    .top-btn:hover {
-      background: #fff;
-      color: var(--accent);
-      transform: translateY(-1px);
+      cursor: pointer;
     }
 
     #backBtn { display: none; }
 
     main {
-      position: relative;
       padding: 30px 20px 60px;
       text-align: center;
     }
@@ -94,15 +85,8 @@
       color: var(--accent);
       font-weight: 600;
       cursor: pointer;
-      transition: background .2s;
     }
 
-    .style-btn:hover {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    /* Sauberes Grid-Layout */
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -112,34 +96,22 @@
     }
 
     .artist-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      width: 100%;
       max-width: 180px;
+      text-align: center;
     }
 
     .artist-card img {
       width: 100%;
-      aspect-ratio: 1/1;
+      aspect-ratio: 1 / 1;
       object-fit: cover;
       border-radius: 14px;
       box-shadow: var(--shadow);
-      transition: transform .2s, box-shadow .2s;
-      cursor: pointer;
-    }
-
-    .artist-card img:hover {
-      transform: scale(1.05);
-      box-shadow: 0 8px 24px rgba(0,0,0,.2);
     }
 
     .artist-label {
       margin-top: 8px;
       font-size: 13px;
       font-weight: 600;
-      color: var(--text);
     }
 
     .center-title {
@@ -149,26 +121,14 @@
       margin-top: 10px;
     }
 
+    .hidden { display: none; }
+
     footer {
       text-align: center;
       font-size: 12px;
       color: #777;
       margin: 40px auto 20px;
       max-width: 600px;
-      line-height: 1.6;
-    }
-
-    .hidden { display: none !important; }
-
-    @media (max-width: 768px) {
-      header { font-size: 18px; padding: 10px; }
-      .style-btn { padding: 8px 12px; font-size: 13px; border-radius: 8px; }
-      .style-grid { gap: 8px; }
-      .gallery-grid { gap: 16px; }
-      .artist-card img { border-radius: 10px; }
-      .artist-label { font-size: 12px; }
-      .center-title { font-size: 26px; }
-      .top-btn { padding: 6px 10px; font-size: 13px; }
     }
   </style>
 </head>
@@ -183,93 +143,104 @@
 
   <main>
     <div id="styleList" class="style-grid"></div>
-    <div id="galleryView" class="gallery-grid"></div>
     <h1 id="styleTitle" class="center-title hidden"></h1>
-    <p id="errorMsg" style="margin-top:40px;color:#999;font-size:14px;display:none;">⚠️ Keine Daten geladen. Bitte prüfe dein Google Sheet oder lade die Seite neu.</p>
+    <div id="galleryView" class="gallery-grid"></div>
+    <p id="errorMsg" class="hidden">⚠️ Ingen data funnet.</p>
   </main>
 
   <footer>
-    <p>All flamingo artworks are AI interpretations inspired by the styles of various artists.  
-    This is a non-commercial art appreciation project.</p>
+    All flamingo artworks are AI interpretations inspired by the styles of various artists.
   </footer>
 
   <script>
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
-    const COL = { style: 'Art style', photo: 'Photo', name: 'artist' };
+    const SHEET_CSV_URL =
+      "https://docs.google.com/spreadsheets/d/1REI62_PJYuDrFoasl6j6KfQUkVGvLKKlrF5Lzga10t4/gviz/tq?tqx=out:csv";
 
     const els = {
-      styleList: document.getElementById('styleList'),
-      galleryView: document.getElementById('galleryView'),
-      styleTitle: document.getElementById('styleTitle'),
-      backBtn: document.getElementById('backBtn'),
-      errorMsg: document.getElementById('errorMsg')
+      styleList: document.getElementById("styleList"),
+      galleryView: document.getElementById("galleryView"),
+      styleTitle: document.getElementById("styleTitle"),
+      backBtn: document.getElementById("backBtn"),
+      errorMsg: document.getElementById("errorMsg")
     };
 
     let rows = [];
+
+    const norm = s => String(s || "").trim().toLowerCase();
 
     Papa.parse(SHEET_CSV_URL, {
       download: true,
       header: true,
       skipEmptyLines: true,
       complete: res => {
-        try {
-          rows = res.data.filter(r => r[COL.name]);
-          initStyles();
-        } catch (e) {
-          console.error("❌ Fehler beim Parsen:", e);
-          els.errorMsg.style.display = "block";
+        if (!res.data.length) {
+          els.errorMsg.classList.remove("hidden");
+          return;
         }
-      },
-      error: err => {
-        console.error("❌ Fehler beim Laden:", err);
-        els.errorMsg.style.display = "block";
+
+        const headers = Object.keys(res.data[0]).map(norm);
+
+        const colStyle = Object.keys(res.data[0]).find(k => norm(k) === "art style");
+        const colPhoto = Object.keys(res.data[0]).find(k => norm(k) === "photo");
+        const colArtist = Object.keys(res.data[0]).find(k => norm(k) === "artist");
+
+        if (!colStyle || !colPhoto || !colArtist) {
+          els.errorMsg.textContent = "⚠️ Kolonnenavn i Google Sheet matcher ikke.";
+          els.errorMsg.classList.remove("hidden");
+          return;
+        }
+
+        rows = res.data.filter(r => r[colArtist]);
+        initStyles(colStyle, colPhoto, colArtist);
       }
     });
 
-    function uniqSorted(list) {
-      return [...new Set(list.filter(Boolean))].sort((a, b) => a.localeCompare(b));
-    }
-
-    function initStyles() {
-      const allStyles = rows.flatMap(r =>
-        String(r[COL.style] || "").split(",").map(s => s.trim())
-      );
-      const styles = Array.from(new Set(allStyles)).sort();
+    function initStyles(colStyle, colPhoto, colArtist) {
+      const styles = [
+        ...new Set(
+          rows.flatMap(r =>
+            String(r[colStyle] || "")
+              .split(",")
+              .map(s => s.trim())
+              .filter(Boolean)
+          )
+        )
+      ].sort();
 
       els.styleList.innerHTML = "";
-      styles.forEach(s => {
+      styles.forEach(style => {
         const btn = document.createElement("button");
         btn.className = "style-btn";
-        btn.textContent = s;
-        btn.onclick = () => showStyle(s);
+        btn.textContent = style;
+        btn.onclick = () => showStyle(style, colStyle, colPhoto, colArtist);
         els.styleList.appendChild(btn);
       });
     }
 
-    function showStyle(styleName) {
+    function showStyle(style, colStyle, colPhoto, colArtist) {
       els.styleList.style.display = "none";
-      els.galleryView.innerHTML = "";
-      els.styleTitle.textContent = styleName;
+      els.styleTitle.textContent = style;
       els.styleTitle.classList.remove("hidden");
-      els.backBtn.style.display = "block";
-
-      const filtered = rows.filter(r =>
-        String(r[COL.style] || "")
-          .split(",")
-          .map(s => s.trim().toLowerCase())
-          .includes(styleName.toLowerCase())
-      );
-
+      els.backBtn.style.display = "inline-block";
       els.galleryView.innerHTML = "";
-      filtered.forEach(r => {
-        const card = document.createElement("div");
-        card.className = "artist-card";
-        card.innerHTML = `
-          <img src="${r[COL.photo]}" alt="${r[COL.name]}">
-          <div class="artist-label">${r[COL.name]}</div>
-        `;
-        els.galleryView.appendChild(card);
-      });
+
+      rows
+        .filter(r =>
+          String(r[colStyle] || "")
+            .toLowerCase()
+            .split(",")
+            .map(s => s.trim())
+            .includes(style.toLowerCase())
+        )
+        .forEach(r => {
+          const card = document.createElement("div");
+          card.className = "artist-card";
+          card.innerHTML = `
+            <img src="${r[colPhoto]}" alt="${r[colArtist]}">
+            <div class="artist-label">${r[colArtist]}</div>
+          `;
+          els.galleryView.appendChild(card);
+        });
     }
 
     els.backBtn.onclick = () => {
