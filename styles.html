@@ -30,46 +30,47 @@
       font-family: system-ui, Segoe UI, Roboto, Inter, sans-serif;
       min-height: 100vh;
     }
+header{
+  position: sticky;
+  top: 0;
+  background: var(--accent);
+  color: #fff;
+  text-align: center;
+  padding: 14px;
+  font-weight: 800;
+  font-size: 22px;
+  z-index: 10;
+}
 
-    header {
-      position: sticky;
-      top: 0;
-      background: var(--accent);
-      color: white;
-      text-align: center;
-      padding: 14px;
-      font-weight: 800;
-      font-size: 22px;
-      z-index: 10;
-    }
+.top-buttons{
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 30;
+}
 
-    .top-buttons {
-      position: absolute;
-      top: 50%;
-      left: 12px;
-      display: flex;
-      gap: 10px;
-      z-index: 30;
-      transform: translateY(-50%);
-    }
+.top-btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-    .top-btn {
-      display: inline-flex;
-      align-itms: center;
-      justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid #fff;
+  background: transparent;
+  color: #fff;
 
-      height: 40px;
-      padding: 0 16px;
-      border-radius: 10px;
-      border: 1px solid #fff;
-      background: transparent;
-      color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
 
-      font-size: 14px:
-      font-weight: 600;
-      line-weight: 1;
-      white-space: nowrap;
-    }
 
     #backBtn { display: none; }
 
