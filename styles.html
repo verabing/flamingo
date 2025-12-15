@@ -45,11 +45,12 @@
 
     .top-buttons {
       position: absolute;
-      top: 10px;
-      left: 10px;
+      top: 50%;
+      left: 12px;
       display: flex;
       gap: 10px;
       z-index: 30;
+      transform: translateY(-50%);
     }
 
     .top-btn {
@@ -134,12 +135,14 @@
 </head>
 
 <body>
-  <header>Flamingo by Style</header>
 
+  <header>
+  Flamingo by Style
   <div class="top-buttons">
     <a href="https://verabing.github.io/flamingo/" class="top-btn">🦩 Back to main gallery</a>
     <button class="top-btn" id="backBtn">← Back to styles</button>
   </div>
+</header>
 
   <main>
     <div id="styleList" class="style-grid"></div>
